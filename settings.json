@@ -1,0 +1,6 @@
+{
+	"next"             : "ctrl+n",
+	"prev"             : "ctrl+p",
+	"bind"             : "cmd+F12",
+	"history"          : "~/.bash_history"
+}
