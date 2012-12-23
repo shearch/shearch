@@ -230,6 +230,84 @@ class Command(textpad.Textbox):
         # TODO: Create new tab value for new arguments.
         cy, cx = self.input_field.getyx()
 
+        #is_changed, prev_arg, start_idx, end_idx = _detect_broken_args()
+
+        # Get the text in the display with ncurses [2]
+        # [2]: http://stackoverflow.com/questions/3065116/get-the-text-in-the-display-with-ncurses
+
+        # python re.sub number after group number [3]
+        # [3]: http://stackoverflow.com/questions/5984633/python-re-sub-group-number-after-number
+
+        # Insert a newline character every 64 characters using python [4]
+        # [4]: http://stackoverflow.com/questions/2657693/insert-a-newline-character-every-64-characters-using-python
+        # re.sub(r'(^.{64})', r'\g<1> === ', s3)
+
+        # Escaping regex string in python [5]
+        # [5]: http://stackoverflow.com/questions/280435/escaping-regex-string-in-python
+
+        if ch > -1 and ch <= 0xff:
+            # TODO: ^H, ^D, handle ch > 0xff, escape violating ch (\).
+            # TODO: '\' is unrecognized.
+            try:
+                self.org_command = re.sub(
+                    r'(^.{' + str(cx) + '})',
+                    r'\g<1>' + re.escape(chr(ch)),
+                    self.org_command
+                )
+            except sre_constants.error:
+                return
+
+        self.index_tab = []
+        for key, value in self.tab_args.iteritems():
+            kw = r'\b' + key + r'\b'
+            self.tab_args[key] = [m.start() for m in re.finditer(
+                kw, self.org_command)]
+
+            for pos in self.tab_args[key]:
+                self.tab_value[pos] = key
+
+            # Compare previous and current tab indexes for a current argument.
+            # This seems buggy and probably is.
+            #self.prev_tab_args[key]
+
+            self.index_tab = sorted(list(set(
+                self.index_tab + self.tab_args[key])))
+
+    def _calculate_new_index_tab(self, prev, curr):
+        """Difference between previous and current command."""
+        stdscr.addstr(12, 2, prev)
+        stdscr.addstr(13, 2, curr)
+
+        # Difference between two strings in python [6]
+        # [6]: http://stackoverflow.com/questions/1209800/difference-between-two-strings-in-python-php
+        diff = difflib.SequenceMatcher(
+            a=prev,
+            b=curr
+        )
+        for i, block in enumerate(diff.get_matching_blocks()):
+            nstr = "match at a[%d] and b[%d] of length %d" % block
+            stdscr.addstr(14 + i, 2, nstr)
+
+        stdscr.refresh()
+
+    def _clear_input_field(self):
+        """Clear input field."""
+        self.input_field.move(0, 0)
+        self.input_field.clrtoeol()
+
+    def _detect_broken_args(self):
+        """
+        Return tuple: (is_changed, prev_arg, start_idx, end_idx).
+
+        Return values:
+
+        - is_changed: True, if edible argument has changed.
+        - prev_arg: Argument that is about to change.
+        - start_idx: Start index of argument.
+        - end_idx: End index of argument.
+
+        When there is no match, (False, '', -1, -1) is return value.
+        """
         # Check, if any of the tabbable arguments is being changed.
             # Find nearest index_tab
         c_lo = -1
@@ -239,8 +317,12 @@ class Command(textpad.Textbox):
         n_lo = -1
         n_hi = -1
 
-        arg_word = ''
-        change_arg = False
+        is_changed = False
+        prev_arg = ''
+        start_idx = -1
+        end_idx = -1
+
+        cy, cx = self.input_field.getyx()
 
         idx, c_lo = self._find_next_field(cx, self.index_tab)
         if c_lo > -1:
@@ -263,19 +345,25 @@ class Command(textpad.Textbox):
 
             # Find if changed occured on tabbable word.
             if p_lo <= cx <= p_hi:
-                change_arg = True
-                arg_word = self.tab_value[p_lo]
+                is_changed = True
+                prev_arg = self.tab_value[p_lo]
+                start_idx = p_lo
+                end_idx = p_hi
             if c_lo <= cx <= c_hi:
-                change_arg = True
-                arg_word = self.tab_value[c_lo]
+                is_changed = True
+                prev_arg = self.tab_value[c_lo]
+                start_idx = c_lo
+                end_idx = c_hi
             if n_lo <= cx <= n_hi:
-                change_arg = True
-                arg_word = self.tab_value[n_lo]
+                is_changed = True
+                prev_arg = self.tab_value[n_lo]
+                start_idx = n_lo
+                end_idx = n_hi
 
             stdscr.addstr(
                 self.line_number + 19,
                 0,
-                'override: ' + str(cx) + ' ' + arg_word
+                'override: ' + str(cx) + ' ' + prev_arg
             )
             stdscr.refresh()
 
@@ -285,72 +373,6 @@ class Command(textpad.Textbox):
 
         #stdscr.addstr(19 + self.line_number, 0, str(self.tab_args))
         #stdscr.refresh()
-
-        # Get the text in the display with ncurses [2]
-        # [2]: http://stackoverflow.com/questions/3065116/get-the-text-in-the-display-with-ncurses
-
-        # python re.sub number after group number [3]
-        # [3]: http://stackoverflow.com/questions/5984633/python-re-sub-group-number-after-number
-
-        # Insert a newline character every 64 characters using python [4]
-        # [4]: http://stackoverflow.com/questions/2657693/insert-a-newline-character-every-64-characters-using-python
-        # re.sub(r'(^.{64})', r'\g<1> === ', s3)
-
-        if ch > -1 and ch <= 0xff:
-            # TODO: ^H, ^D, handle ch > 0xff, escape violating ch (\).
-            try:
-                self.org_command = re.sub(
-                    r'(^.{' + str(cx) + '})',
-                    r'\g<1>' + chr(ch),
-                    self.org_command
-                )
-            except sre_constants.error:
-                return
-
-        self.index_tab = []
-        for key, value in self.tab_args.iteritems():
-            kw = r'\b' + key + r'\b'
-            self.tab_args[key] = [m.start() for m in re.finditer(
-                kw, self.org_command)]
-
-            for pos in self.tab_args[key]:
-                self.tab_value[pos] = key
-
-            # Compare previous and current tab indexes for a current argument.
-            # This seems buggy and probably is.
-            #self.prev_tab_args[key]
-
-            self.index_tab = sorted(list(set(
-                self.index_tab + self.tab_args[key])))
-
-        """
-        stdscr.addstr(12, 2, prev)
-        stdscr.addstr(13 + self.line_number, 2, str(self.index_tab) + ' ' +
-            arg_word + str((c_lo, c_hi, p_lo, p_hi, n_lo, n_hi)))
-        stdscr.refresh()
-        """
-
-    def _calculate_new_index_tab(self, prev, curr):
-        """Difference between previous and current command."""
-        stdscr.addstr(12, 2, prev)
-        stdscr.addstr(13, 2, curr)
-
-        # Difference between two strings in python [5]
-        # [5]: http://stackoverflow.com/questions/1209800/difference-between-two-strings-in-python-php
-        diff = difflib.SequenceMatcher(
-            a=prev,
-            b=curr
-        )
-        for i, block in enumerate(diff.get_matching_blocks()):
-            nstr = "match at a[%d] and b[%d] of length %d" % block
-            stdscr.addstr(14 + i, 2, nstr)
-
-        stdscr.refresh()
-
-    def _clear_input_field(self):
-        """Clear input field."""
-        self.input_field.move(0, 0)
-        self.input_field.clrtoeol()
 
     def _find_next_field(self, index, tab_field):
         """Return tuple, index & position of next edible argument on <TAB>."""
