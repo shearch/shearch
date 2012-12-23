@@ -51,6 +51,9 @@ class Command(textpad.Textbox):
     manipulation.
     """
 
+    # TODO: Remove this debug hack.
+    stdscr = None
+
     # Match text inside single and/or double quotes.
     #re.split(r'''("(?:[^\\"]+|\\.)*")|('(?:[^\\']+|\\.)*')''', nstr)
 
@@ -123,7 +126,7 @@ class Command(textpad.Textbox):
                 cx,
                 self.index_tab
             )
-            self.selected_word = self.tab_value[next_field]
+            self.selected_word = self.tab_value[next_field] # KeyError: -1
 
             # Highlighting and selecting text with python curses [1]
             # [1]: http://stackoverflow.com/questions/6807808/highlighting-and-selecting-text-with-python-curses

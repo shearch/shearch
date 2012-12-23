@@ -1,7 +1,7 @@
 import curses
 
 import bindings
-import command
+import command_
 from db import data_json as data
 
 # TODO: Replace current tags field with Textbox.
@@ -27,7 +27,7 @@ def parse_tags(tag_field):
             tmp_scr    = stdscr.derwin(1, xmax - 18, n + pad, 4)
             input_fields.append(tmp_scr)
 
-        command = Command(
+        command = command_.Command(
             item,
             n,
             input_fields[n],
@@ -78,6 +78,9 @@ stdscr.keypad(1)
 stdscr.addstr(0, 5, "Hit 'enter' to quit")
 stdscr.addstr(5, 1, " * tags: ")
 stdscr.refresh()
+
+# TODO: Remove this debug hack.
+command_.stdscr = stdscr
 
 # Cursor index.
 i = 9
