@@ -3,33 +3,27 @@
 # Copyright: This module has been placed in the public domain.
 
 """
-A finite state machine specialized for regular-expression-based text filters,
-this module defines the following classes:
+Textbox subclass for easier text manipulation, this module defines
+the following class:
 
 - `Command`, meta-data about shell command.
-
-Exception classes:
-
-- `StateMachineError`
-- `UnexpectedIndentationError`
-- `TransitionCorrection`: Raised to switch to another transition.
-- `StateCorrection`: Raised to switch to another state & transition.
-
-Functions:
-
-- `string2lines()`: split a multi-line string into a list of one-line strings
 
 
 How To Use This Module
 ======================
 (See the individual classes, methods, and attributes for details.)
 
-1. Import it: ``import statemachine`` or ``from statemachine import ...``.
-   You will also need to ``import re``.
+1. Import it: ``import command_``.
 
-6. Remove any lingering circular references::
+2. Initialize command: ``mycommand = command_.Command(...)``.
 
-       sm.unlink()
+3. Interact with command::
+
+    a) Print command description: ``mycommand.print_description()``.
+
+    b) Manipulate cursor position: ``mycommand.get_input_field().move(0, 0)``.
+
+    c) Edit command in-place: ``mycommand.edit()``.
 """
 
 __docformat__ = 'reStructuredText'
@@ -38,6 +32,7 @@ import curses
 from curses import textpad
 import difflib
 import re
+import sre_constants
 import subprocess
 
 import bindings
@@ -49,13 +44,15 @@ class Command(textpad.Textbox):
 
     Command contains methods for simpler text formatting and string
     manipulation.
+
+    Methods:
+
+    - `get_input_field`: return input field, can be used to control cursor.
+    - `print_description`: print command description in main terminal window.
     """
 
     # TODO: Remove this debug hack.
     stdscr = None
-
-    # Match text inside single and/or double quotes.
-    #re.split(r'''("(?:[^\\"]+|\\.)*")|('(?:[^\\']+|\\.)*')''', nstr)
 
     def __init__(self, item, line_number, input_field, *args, **kwargs):
         """
@@ -99,7 +96,6 @@ class Command(textpad.Textbox):
 
         if 'nix_edit' in self.item:
             self.place_holder = self._format_command(
-                self.line_number,
                 self.item['nix_edit'],
                 self.item['nix_args']
             )
@@ -126,7 +122,11 @@ class Command(textpad.Textbox):
                 cx,
                 self.index_tab
             )
-            self.selected_word = self.tab_value[next_field] # TODO: KeyError: -1
+            try:
+                self.selected_word = self.tab_value[next_field]
+            except KeyError:
+                self.selected_word = ''
+                next_field = cx
 
             # Highlighting and selecting text with python curses [1]
             # [1]: http://stackoverflow.com/questions/6807808/highlighting-and-selecting-text-with-python-curses
@@ -218,6 +218,15 @@ class Command(textpad.Textbox):
         return textpad.Textbox.do_command(self, ch)
 
     def _adjust_index_tab(self, ch):
+        """
+        Recalculate new <TAB> indexes for edible arguments.
+
+        Updates followin structures:
+
+        - `tab_args`
+        - `tab_value`
+        - `index_tab`
+        """
         # TODO: Create new tab value for new arguments.
         cy, cx = self.input_field.getyx()
 
@@ -288,12 +297,15 @@ class Command(textpad.Textbox):
         # re.sub(r'(^.{64})', r'\g<1> === ', s3)
 
         if ch > -1 and ch <= 0xff:
-            # TODO: Delete characters, handle ch > 0xff.
-            self.org_command = re.sub(
-                r'(^.{' + str(cx) + '})',
-                r'\g<1>' + chr(ch),
-                self.org_command
-            )
+            # TODO: ^H, ^D, handle ch > 0xff, escape violating ch (\).
+            try:
+                self.org_command = re.sub(
+                    r'(^.{' + str(cx) + '})',
+                    r'\g<1>' + chr(ch),
+                    self.org_command
+                )
+            except sre_constants.error:
+                return
 
         self.index_tab = []
         for key, value in self.tab_args.iteritems():
@@ -319,6 +331,7 @@ class Command(textpad.Textbox):
         """
 
     def _calculate_new_index_tab(self, prev, curr):
+        """Difference between previous and current command."""
         stdscr.addstr(12, 2, prev)
         stdscr.addstr(13, 2, curr)
 
@@ -335,10 +348,12 @@ class Command(textpad.Textbox):
         stdscr.refresh()
 
     def _clear_input_field(self):
+        """Clear input field."""
         self.input_field.move(0, 0)
         self.input_field.clrtoeol()
 
     def _find_next_field(self, index, tab_field):
+        """Return tuple, index & position of next edible argument on <TAB>."""
         if len(tab_field) < 1:
             return (0, -1)
         for n, i in enumerate(tab_field):
@@ -346,7 +361,17 @@ class Command(textpad.Textbox):
                 return (n, i)
         return (0, tab_field[0])
 
-    def _format_command(self, index, command, args):
+    def _format_command(self, command, args):
+        """
+        Make and return formatted command as string.
+
+        This is run on initialization.
+
+        Parameters:
+
+        - `command`: printf like formatted string.
+        - `args`: tuple of arguments that should be put into formatted string.
+        """
         #holders = re.findall("%s|%c", command)
         holders = re.split("(%s|%c)", command)
 
@@ -383,19 +408,24 @@ class Command(textpad.Textbox):
         return ''.join(holders)
 
     def get_input_field(self):
+        """Public method return input field. Used to control cursor."""
         return self.input_field
 
     def _reformat_command(self):
-        # Reformats current state of a command to match edible state.
+        """Reformats current state of a command to match edible state."""
         # TODO: Try to recognize newly added arguments and reformat
         #       edible state accordingly.
+        # Match text inside single and/or double quotes.
+        #re.split(r'''("(?:[^\\"]+|\\.)*")|('(?:[^\\']+|\\.)*')''', nstr)
         pass
 
     def _print_command(self, command):
+        """Print command in the commands list in main terminal window."""
         self.input_field.addstr(command)
         self.input_field.refresh()
 
     def print_description(self):
+        """Print command description in main terminal window."""
         stdscr.move(2, 1)
         stdscr.clrtoeol()
         stdscr.addstr(2, 2, self.item['description'])
