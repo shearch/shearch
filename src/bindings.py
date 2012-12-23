@@ -1,7 +1,6 @@
-"""
-This is where key bindings are defined.
-"""
+"""This is where key bindings are defined."""
 
+# Breaking coding style here.
 # Hex values from (http://www.bbdsoft.com/ascii.html)
 BACKSPACE = 0x7F
 COMMA     = 0x2c

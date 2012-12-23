@@ -1,6 +1,4 @@
-"""
-This tests data_json command retrieval module.
-"""
+"""This tests data_json command retrieval module."""
 
 # http://openp2p.com/pub/a/python/2004/12/02/tdd_pyunit.html
 # http://onlamp.com/pub/a/python/2005/02/03/tdd_pyunit2.html

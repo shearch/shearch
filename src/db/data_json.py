@@ -1,13 +1,15 @@
 """
-data_json command retrieval module
-This demonstrates simple knowledge base creation using data from example.json.
+json command parser module
+
+This demonstrates simple command base creation using data from example.json.
 """
 
-import json, os
+import json
+import os
 
 json_file = os.path.join(os.path.dirname(__file__), 'example.json')
 json_data = open(json_file)
-data      = json.load(json_data)
+data = json.load(json_data)
 
 # Key is tag, value is hash command.
 db = {}
@@ -19,7 +21,7 @@ command = {}
 uberset = set()
 
 for item in data['item']:
-    key          = hash(item['command'])
+    key = hash(item['command'])
     command[key] = item
     uberset.add(key)
 
