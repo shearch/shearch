@@ -39,3 +39,5 @@ JSON database structure. Single item contains.
 Install:
 curl -L https://github.com/agiz/shearch/raw/master/tools/install.sh | sh
 wget --no-check-certificate https://github.com/agiz/shearch/raw/master/tools/install.sh -O - | sh
+
+![Go](http://racingpool.si/wp-content/themes/ImpreZZ/images/search_btn.gif "Go")

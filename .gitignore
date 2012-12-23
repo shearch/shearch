@@ -23,5 +23,5 @@ Thumbs.db
 /env_*
 
 # Generated documentation
-/docs/_build/
+/docs/build/
 
