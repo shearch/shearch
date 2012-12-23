@@ -37,5 +37,5 @@ JSON database structure. Single item contains.
 "edibles" field is optional. "win" field is optional (command for windows). "ps" field is optional (powershell command).If defined, "ps" field will be used in powershell enviornment. Two commands all have their respective edibles.
 
 Install:
-curl -L https://github.com/robbyrussell/oh-my-zsh/raw/master/tools/install.sh | sh
-wget --no-check-certificate https://github.com/robbyrussell/oh-my-zsh/raw/master/tools/install.sh -O - | sh
+curl -L https://github.com/agiz/shearch/raw/master/tools/install.sh | sh
+wget --no-check-certificate https://github.com/agiz/shearch/raw/master/tools/install.sh -O - | sh

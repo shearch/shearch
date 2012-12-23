@@ -1,7 +1,6 @@
-"""
-This is where key bindings are defined.
-"""
+"""This is where key bindings are defined."""
 
+# Breaking coding style here.
 # Hex values from (http://www.bbdsoft.com/ascii.html)
 BACKSPACE = 0x7F
 COMMA     = 0x2c
@@ -45,3 +44,5 @@ delete    = (DELETE, CTRL_D)
 edit_term = (KEY_DOWN, CTRL_N, KEY_UP, CTRL_P, RETURN, ENTER)
 
 tabs = (TAB, STAB)
+
+NON_CHANGING = (CTRL_A, CTRL_B, CTRL_E, CTRL_F, CTRL_N, CTRL_P, KEY_DOWN, KEY_HOME, KEY_END, KEY_LEFT, KEY_RIGHT, KEY_UP)

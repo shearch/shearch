@@ -1,0 +1,27 @@
+# Hidden files
+.*
+
+# OS generated files
+ehthumbs.db
+Icon?
+Thumbs.db
+
+# Python compiled source code
+*.pyc
+
+# Vim swap files
+*.swp
+
+# Sublime Text 2 project files
+*.sublime-project
+*.sublime-workspace
+
+# SQLite database
+*.sqlite
+
+# Virtual environment
+/env_*
+
+# Generated documentation
+/docs/_build/
+

@@ -1,0 +1,6 @@
+# Type in shell:
+# $ python
+# >>> import curses; curses.initscr(); curses.endwin();
+
+# or just use shell:
+# $ reset
