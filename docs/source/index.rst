@@ -3,17 +3,31 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-shearch's documentation
-=======================
+shearch: Mesh between shell history, man manual and github
+==========================================================
 
-Contents:
----------
+::
+
+         _______. __         _______     ___      .______        ______  __    __
+        /       ||  |       |   ____|   /   \     |   _  \      /      ||  |  |  |
+       |   (----`|  |_____  |  |__     /  ^  \    |  |_)  |    |  ,----;|  |__|  |
+        \   \    |   __   | |   __|   /  /_\  \   |      /     |  |     |   __   |
+    .----)   |   |  |  |  | |  |____ /  _____  \  |  |\  \----.|  `----.|  |  |  |
+    |_______/    |__|  |__| |_______/__/     \__\ | _| `._____| \______||__|  |__|
+
+                        It"s not a secret when you have shearch.
+
+Contents
+--------
 
 .. toctree::
    :maxdepth: 2
 
-Source Code and Issue Tracker:
-------------------------------
+   code
+
+
+Source Code and Issue Tracker
+-----------------------------
 
 For development GitHub_ is used, so source code and issue tracker is found
 there_.
