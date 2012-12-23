@@ -98,7 +98,7 @@ class Command(textpad.Textbox):
         #self.text_box = _Textbox(self.input_field, insert_mode=True)
 
         if 'nix_edit' in self.item:
-            self.place_holder = self.format_command(
+            self.place_holder = self._format_command(
                 self.line_number,
                 self.item['nix_edit'],
                 self.item['nix_args']
@@ -108,7 +108,7 @@ class Command(textpad.Textbox):
 
         self.pplace_holder = self.place_holder
         self.org_command = self.place_holder
-        self.print_command(self.place_holder)
+        self._print_command(self.place_holder)
 
         textpad.Textbox.__init__(self, *args, **kwargs)
 
@@ -122,11 +122,11 @@ class Command(textpad.Textbox):
             # Cursor position y, x.
             cy, cx = self.input_field.getyx()
             # Detect cursor position and move tab to the next nearest field.
-            selected_word_index, next_field = self.find_next_field(
+            selected_word_index, next_field = self._find_next_field(
                 cx,
                 self.index_tab
             )
-            self.selected_word = self.tab_value[next_field] # KeyError: -1
+            self.selected_word = self.tab_value[next_field] # TODO: KeyError: -1
 
             # Highlighting and selecting text with python curses [1]
             # [1]: http://stackoverflow.com/questions/6807808/highlighting-and-selecting-text-with-python-curses
@@ -166,20 +166,20 @@ class Command(textpad.Textbox):
             if ch in bindings.NON_CHANGING:
                 self.tab_marked = False
             else:
-                self.adjust_index_tab(ch)
+                self._adjust_index_tab(ch)
 
             # TODO: Re-render new command.
             #self.place_holder = self.input_field.instr()
             """
             if self.place_holder != self.pplace_holder:
-                self.calculate_new_index_tab(
+                self._calculate_new_index_tab(
                     self.pplace_holder,
                     self.place_holder
                 )
             """
 
             """
-            self.calculate_new_index_tab(
+            self._calculate_new_index_tab(
                 self.pplace_holder,
                 self.place_holder
             )
@@ -217,7 +217,7 @@ class Command(textpad.Textbox):
         #self.pplace_holder = self.place_holder
         return textpad.Textbox.do_command(self, ch)
 
-    def adjust_index_tab(self, ch):
+    def _adjust_index_tab(self, ch):
         # TODO: Create new tab value for new arguments.
         cy, cx = self.input_field.getyx()
 
@@ -233,7 +233,7 @@ class Command(textpad.Textbox):
         arg_word = ''
         change_arg = False
 
-        idx, c_lo = self.find_next_field(cx, self.index_tab)
+        idx, c_lo = self._find_next_field(cx, self.index_tab)
         if c_lo > -1:
             # Get tabbable index previous, current and next position.
             # TODO: Go arround array to find values.
@@ -318,7 +318,7 @@ class Command(textpad.Textbox):
         stdscr.refresh()
         """
 
-    def calculate_new_index_tab(self, prev, curr):
+    def _calculate_new_index_tab(self, prev, curr):
         stdscr.addstr(12, 2, prev)
         stdscr.addstr(13, 2, curr)
 
@@ -334,11 +334,11 @@ class Command(textpad.Textbox):
 
         stdscr.refresh()
 
-    def clear_input_field(self):
+    def _clear_input_field(self):
         self.input_field.move(0, 0)
         self.input_field.clrtoeol()
 
-    def find_next_field(self, index, tab_field):
+    def _find_next_field(self, index, tab_field):
         if len(tab_field) < 1:
             return (0, -1)
         for n, i in enumerate(tab_field):
@@ -346,7 +346,7 @@ class Command(textpad.Textbox):
                 return (n, i)
         return (0, tab_field[0])
 
-    def format_command(self, index, command, args):
+    def _format_command(self, index, command, args):
         #holders = re.findall("%s|%c", command)
         holders = re.split("(%s|%c)", command)
 
@@ -375,7 +375,7 @@ class Command(textpad.Textbox):
 
         self.org_command = ''.join(holders)
         # Create index_tab
-        self.adjust_index_tab(-1)
+        self._adjust_index_tab(-1)
 
         #stdscr.addstr(19 + self.line_number, 0, str(self.tab_value))
         #stdscr.refresh()
@@ -385,13 +385,13 @@ class Command(textpad.Textbox):
     def get_input_field(self):
         return self.input_field
 
-    def reformat_command(self):
+    def _reformat_command(self):
         # Reformats current state of a command to match edible state.
         # TODO: Try to recognize newly added arguments and reformat
         #       edible state accordingly.
         pass
 
-    def print_command(self, command):
+    def _print_command(self, command):
         self.input_field.addstr(command)
         self.input_field.refresh()
 
