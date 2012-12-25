@@ -97,7 +97,7 @@ pad = 7
 
 while key not in bindings.enter:
     key = stdscr.getch()
-    #stdscr.addstr(15, 15, str(key))
+    stdscr.addstr(15, 15, str(hex(key)) + '   <')
     stdscr.refresh()
 
     if key in bindings.prev:

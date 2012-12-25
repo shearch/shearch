@@ -1,17 +1,24 @@
 """This is where key bindings are defined."""
 
-# Breaking coding style here.
+# Breaking coding style here (excessive whitespace).
 # Hex values from (http://www.bbdsoft.com/ascii.html)
+BACKSLASH = 0x5c
 BACKSPACE = 0x7F
 COMMA     = 0x2c
-CTRL_A    = 0x1
-CTRL_B    = 0x2
-CTRL_D    = 0x4
-CTRL_E    = 0x5
-CTRL_F    = 0x6
-CTRL_H    = 0x107
-CTRL_N    = 0x0E
-CTRL_P    = 0x10
+CTRL_A    = 0x1   # Beginning of the line (Home).
+CTRL_B    = 0x2   # Back one character.
+CTRL_D    = 0x4   # Delete.
+CTRL_E    = 0x5   # End of the line (End).
+CTRL_F    = 0x6   # Forward one character.
+CTRL_H    = 0x107 # Backspace. Default value 0x8? Python remmaping this key?
+CTRL_K    = 0xb   # Cut line after cursor to clipboard.
+CTRL_L    = 0xc   # Clear screen.
+CTRL_N    = 0x0E  # Next command (down arrow).
+CTRL_P    = 0x10  # Previous command (up arrow).
+CTRL_U    = 0x15  # Cut line before cursor to clipboard.
+CTRL_W    = 0x17  # Cut word before cursor to clipboard.
+CTRL_Y    = 0x19  # DSUSP, delayed suspend on BSD-based systems.
+CTRL__    = 0x1f  # Undo.
 DELETE    = 0x14a
 ENTER     = 0x157
 ESC       = 0x1b
@@ -25,6 +32,9 @@ RETURN    = 0xa
 SPACE     = 0x20
 STAB      = 0x161
 TAB       = 0x9
+
+# TODO: OS X CTRL_Y bug. *Not* a bug but behavior. $ stty dsusp undef
+ALT_SHIFT_Y = 0x81
 
 next = (KEY_DOWN, CTRL_N)
 prev = (KEY_UP, CTRL_P)
@@ -45,4 +55,7 @@ edit_term = (KEY_DOWN, CTRL_N, KEY_UP, CTRL_P, RETURN, ENTER)
 
 tabs = (TAB, STAB)
 
-NON_CHANGING = (CTRL_A, CTRL_B, CTRL_E, CTRL_F, CTRL_N, CTRL_P, KEY_DOWN, KEY_HOME, KEY_END, KEY_LEFT, KEY_RIGHT, KEY_UP)
+yank = (CTRL_Y, ALT_SHIFT_Y)
+
+NON_CHANGING = (CTRL_A, CTRL_B, CTRL_E, CTRL_F, CTRL_N, CTRL_P, KEY_DOWN,
+    KEY_HOME, KEY_END, KEY_LEFT, KEY_RIGHT, KEY_UP)

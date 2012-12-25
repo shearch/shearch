@@ -1,0 +1,60 @@
+{
+	"item": [
+		{
+			"command"     : "find . -name \"*.txt\"",
+			"description" : "Finds all files cotaining string %str%",
+			"nix_edit"    : {
+								"mask": "find . -name \"%s\"",
+								"args": ["*.txt"]
+							},
+			"tag"         : ["find", "files", "contain"]
+		},
+		{
+			"command"     : "ps aux",
+			"description" : "List all processes.",
+			"tag"         : ["list", "process", "ps"]
+		},
+		{
+			"command"     : "hg status",
+			"description" : "Returns hg status.",
+			"tag"         : ["hg", "mercurial", "status"]
+		},
+		{
+			"command"     : "git status",
+			"description" : "Returns git status.",
+			"tag"         : ["git", "status"]
+		},
+		{
+			"command"     : "svn status",
+			"description" : "Returns subversion status.",
+			"tag"         : ["subversion", "svn", "status"]
+		},
+		{
+			"command"     : "git commit -m \"Added new commands.\"",
+			"description" : "Saves your newly added commands.",
+			"nix_edit"    : {
+								"mask": "git commit -m \"%s\"",
+								"args": ["Added new commands"]
+							},
+			"tag"         : ["git", "contribute", "commit"]
+		},
+		{
+			"command"     : "git remote add mygithub git@github.com:agiz/shearch.git",
+			"description" : "Adds your github to remote repositories.",
+			"nix_edit"    : {
+								"mask": "git remote add %s git@github.com:%c/%s.git",
+								"args": ["mygithub", "git config --global user.name", "shearch"]
+							},
+			"tag"         : ["git", "add", "commit", "remote", "contribute"]
+		},
+		{
+			"command"     : "git push mygithub master",
+			"description" : "Uploads changes to your github repository.",
+			"nix_edit"    : {
+								"mask": "git push %s %s",
+								"args": ["mygithub", "master"]
+							},
+			"tag"         : ["git", "push", "contribute"]
+		}
+	]
+}
