@@ -9,7 +9,7 @@ add your favorite binding key to .shell_rc
 
 Usage:
 
-Search: [ctlr+r]
+Search: [ctrl+r]
 Next: ctrl+n
 Previous: ctrl+p
 

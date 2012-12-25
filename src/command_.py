@@ -94,8 +94,8 @@ class Command(textpad.Textbox):
 
         if 'nix_edit' in self._item:
             self._place_holder = self._format_command(
-                self._item['nix_edit'],
-                self._item['nix_args']
+                self._item['nix_edit']['mask'],
+                self._item['nix_edit']['args']
             )
         else:
             self._place_holder = self._item['command']
