@@ -264,12 +264,14 @@ class Command(textpad.Textbox):
                 cx += 1
             elif ch in bindings.backspace:
                 reformat = True
-                self._org_command = self._org_command[:cx - 1] + self._org_command[cx:]
+                self._org_command = (self._org_command[:cx - 1] +
+                    self._org_command[cx:])
                 #self._input_field.move(0, cx - 1)
                 ch = bindings.CTRL_H
             elif ch in bindings.delete:
                 reformat = True
-                self._org_command = self._org_command[:cx] + self._org_command[cx + 1:]
+                self._org_command = (self._org_command[:cx] +
+                    self._org_command[cx + 1:])
                 ch = bindings.CTRL_D
             elif ch == bindings.CTRL_K:
                 reformat = True
@@ -277,9 +279,21 @@ class Command(textpad.Textbox):
                 self._org_command = self._org_command[:cx]
             elif ch == bindings.CTRL_U:
                 reformat = True
+                self._yank = self._org_command[:cx]
+                self._org_command = self._org_command[cx:]
             elif ch == bindings.CTRL_W:
                 # TODO: bash, zsh word definition difference.
                 reformat = True
+                p = re.compile(r'\s.?\w')
+                _s = [m.start() for m in p.finditer(self._org_command, 0, cx)]
+                try:
+                    _s = _s[-1]
+                    _s += 1
+                except IndexError:
+                    _s = 0
+                self._yank = self._org_command[_s:cx + _s]
+                self._org_command = (self._org_command[:_s] +
+                    self._org_command[cx:])
             elif ch in bindings.yank:
                 # paste
                 reformat = True
@@ -303,11 +317,11 @@ class Command(textpad.Textbox):
                         stdscr.addstr(18 + self._line_number, 0, str(1))
                         stdscr.refresh()
                     except sre_constants.error:
-                        # Rough exit. Read command from self._input_field.instr(0, 0),
-                        # set cursor to original position. Hope this never happens.
+                        # Rough exit. Read self._input_field.instr(0, 0), set
+                        # cursor to original position. Hope this never happen.
                         regex_fail = True
-                        #stdscr.addstr(18 + self._line_number, 0, str(2))
-                        #stdscr.refresh()
+                    except UnicodeDecodeError:
+                        egex_fail = True
 
                 if regex_fail:
                     ret_val = textpad.Textbox.do_command(self, ch)

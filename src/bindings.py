@@ -51,7 +51,7 @@ space = (SPACE, COMMA)
 backspace = (BACKSPACE, CTRL_H)
 delete    = (DELETE, CTRL_D)
 
-edit_term = (KEY_DOWN, CTRL_N, KEY_UP, CTRL_P, RETURN, ENTER)
+edit_term = (KEY_DOWN, CTRL_N, KEY_UP, CTRL_P, RETURN, ENTER, ESC)
 
 tabs = (TAB, STAB)
 
