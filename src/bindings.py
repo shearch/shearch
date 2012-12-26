@@ -2,8 +2,6 @@
 
 # Breaking coding style here (excessive whitespace).
 # Hex values from (http://www.bbdsoft.com/ascii.html)
-KEY_B     = 0x62
-KEY_F     = 0x66
 BACKSLASH = 0x5c
 BACKSPACE = 0x7F
 COMMA     = 0x2c
@@ -24,11 +22,19 @@ CTRL__    = 0x1f  # Undo.
 DELETE    = 0x14a
 ENTER     = 0x157
 ESC       = 0x1b
+KEY_B     = 0x62
+KEY_C     = 0x63
+KEY_D     = 0x64
 KEY_DOWN  = 0x102
 KEY_HOME  = 0x106
 KEY_END   = 0x168
+KEY_F     = 0x66
+KEY_L     = 0x6c
 KEY_LEFT  = 0x104
+KEY_R     = 0x72
 KEY_RIGHT = 0x105
+KEY_T     = 0x74
+KEY_U     = 0x75
 KEY_UP    = 0x103
 RETURN    = 0xa
 SPACE     = 0x20
