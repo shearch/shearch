@@ -2,6 +2,8 @@
 
 # Breaking coding style here (excessive whitespace).
 # Hex values from (http://www.bbdsoft.com/ascii.html)
+ALT_B     = 0x62  # Back one word.
+ALT_F     = 0x66  # Forward one word.
 BACKSLASH = 0x5c
 BACKSPACE = 0x7F
 COMMA     = 0x2c
@@ -51,7 +53,7 @@ space = (SPACE, COMMA)
 backspace = (BACKSPACE, CTRL_H)
 delete    = (DELETE, CTRL_D)
 
-edit_term = (KEY_DOWN, CTRL_N, KEY_UP, CTRL_P, RETURN, ENTER, ESC)
+edit_term = (KEY_DOWN, CTRL_N, KEY_UP, CTRL_P, RETURN, ENTER)
 
 tabs = (TAB, STAB)
 

@@ -118,6 +118,16 @@ class Command(textpad.Textbox):
         if ch in bindings.edit_term:
             self._tab_marked = False # Agreed or mark previous cursor position?
             return 0
+        # elif ch == bindings.ALT_B:
+        #     #pass
+        #     cy, cx = self._input_field.getyx()
+        #     self._input_field.move(0, cx - 5)
+        #     return 1
+        # elif ch == bindings.ALT_F:
+        #     #pass
+        #     cy, cx = self._input_field.getyx()
+        #     self._input_field.move(0, cx + 5)
+        #     return 1
         elif ch == bindings.TAB:
             # Cursor position y, x.
             cy, cx = self._input_field.getyx()
@@ -173,28 +183,25 @@ class Command(textpad.Textbox):
             else:
                 ch, regex_fail, ret_val = self._adjust_index_tab(ch)
 
-            # TODO: Re-render new command.
-            #self._place_holder = self._input_field.instr()
-            """
-            if self._place_holder != self._pplace_holder:
-                self._calculate_new_index_tab(
-                    self._pplace_holder,
-                    self._place_holder
-                )
-            """
-
-            """
-            self._calculate_new_index_tab(
-                self._pplace_holder,
-                self._place_holder
-            )
-            """
-
         if self._tab_marked:
             # Delete the marked word.
             self._tab_marked = False
             arg_len = len(self._selected_word)
-            #cy, cx = self._input_field.getyx()
+
+            cy, cx = self._input_field.getyx()
+            self._org_command = (self._org_command[:cx] +
+                chr(ch) + self._org_command[cx + 1 + arg_len:])
+
+            stdscr.move(18 + self._line_number, 0)
+            stdscr.clrtoeol()
+            stdscr.addstr(18 + self._line_number, 4, self._org_command)
+            stdscr.refresh()
+
+            self._delete_chars(arg_len)
+
+            #regex_fail = True
+            #ret_val = textpad.Textbox.do_command(self, bindings.CTRL_D)
+
             #self._pplace_holder = self._input_field.instr(0, 0)
 
             #stdscr.move(2, 1)
@@ -208,8 +215,8 @@ class Command(textpad.Textbox):
             # Get before change, so we know the state before changed.
             #self._pplace_holder = self._input_field.instr()
 
-            for i in range(arg_len):
-                textpad.Textbox.do_command(self, bindings.CTRL_D)
+            #for i in range(arg_len):
+            #    textpad.Textbox.do_command(self, bindings.CTRL_D)
 
             # # Save just from unmodified part till end. ?? This is wrong!
             # self._pplace_holder = self._input_field.instr()
@@ -254,10 +261,6 @@ class Command(textpad.Textbox):
 
         # Escaping regex string in python [5]
         # [5]: http://stackoverflow.com/questions/280435/escaping-regex-string-in-python
-
-        # TODO: ^H, ^D, handle ch > 0xff, escape violating ch (\).
-        # TODO: unrecognized bindings by Textbox:
-        #       ctrl_u, ctrl_w, ctrl_l
         if ch > -1:
             if ch == bindings.BACKSLASH:
                 character = '\\\\'
@@ -266,7 +269,6 @@ class Command(textpad.Textbox):
                 reformat = True
                 self._org_command = (self._org_command[:cx - 1] +
                     self._org_command[cx:])
-                #self._input_field.move(0, cx - 1)
                 ch = bindings.CTRL_H
             elif ch in bindings.delete:
                 reformat = True
@@ -277,12 +279,13 @@ class Command(textpad.Textbox):
                 reformat = True
                 self._yank = self._org_command[cx:]
                 self._org_command = self._org_command[:cx]
+                self._delete_chars(len(self._yank))
             elif ch == bindings.CTRL_U:
                 reformat = True
                 self._yank = self._org_command[:cx]
                 self._org_command = self._org_command[cx:]
+                self._delete_chars(len(self._yank), 0)
             elif ch == bindings.CTRL_W:
-                # TODO: bash, zsh word definition difference.
                 reformat = True
                 p = re.compile(r'\s.?\w')
                 _s = [m.start() for m in p.finditer(self._org_command, 0, cx)]
@@ -291,13 +294,17 @@ class Command(textpad.Textbox):
                     _s += 1
                 except IndexError:
                     _s = 0
-                self._yank = self._org_command[_s:cx + _s]
+                self._yank = self._org_command[_s:cx]
                 self._org_command = (self._org_command[:_s] +
                     self._org_command[cx:])
+                self._delete_chars(len(self._yank), _s)
             elif ch in bindings.yank:
                 # paste
                 reformat = True
                 #ch = bindings.CTRL_Y
+                self._org_command = (self._org_command[:cx] +
+                    str(self._yank) + self._org_command[cx:])
+                self._put_chars(str(self._yank))
             else:
                 try:
                     character = chr(ch)
@@ -374,6 +381,13 @@ class Command(textpad.Textbox):
         self._input_field.move(0, 0)
         self._input_field.clrtoeol()
 
+    def _delete_chars(self, count, move_cursor=-1):
+        """Removes n characters from a string."""
+        if move_cursor > -1:
+            self._input_field.move(0, move_cursor)
+        for i in range(count):
+            textpad.Textbox.do_command(self, bindings.CTRL_D)
+
     def _detect_broken_args(self):
         """
         Return tuple: (is_changed, prev_arg, start_idx, end_idx).
@@ -388,7 +402,7 @@ class Command(textpad.Textbox):
         When there is no match, (False, '', -1, -1) is return value.
         """
         # Check, if any of the tabbable arguments is being changed.
-            # Find nearest index_tab
+        # Find nearest index_tab
         c_lo = -1
         c_hi = -1
         p_lo = -1
@@ -513,8 +527,6 @@ class Command(textpad.Textbox):
 
     def _reformat_command(self):
         """Reformats current state of a command to match edible state."""
-        # TODO: Try to recognize newly added arguments and reformat
-        #       edible state accordingly.
         # Match text inside single and/or double quotes.
         #re.split(r'''("(?:[^\\"]+|\\.)*")|('(?:[^\\']+|\\.)*')''', nstr)
         pass
@@ -531,3 +543,7 @@ class Command(textpad.Textbox):
         stdscr.addstr(2, 2, self._item['description'])
         stdscr.refresh()
 
+    def _put_chars(self, yank):
+        """Inserts n characters in a string."""
+        for chy in yank:
+            textpad.Textbox.do_command(self, chy)
