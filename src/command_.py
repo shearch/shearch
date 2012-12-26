@@ -77,9 +77,8 @@ class Command(textpad.Textbox):
 
         self._org_command = ''
 
-        self._tab_marked = False
-        """If True, current word is selected and pressing non terminating
-        character will replace this word."""
+        self._prev_ch = ''
+        """Previous character. Used for navigation hacks."""
 
         self._selected_word = ''
         """Currently marked argument."""
@@ -93,45 +92,49 @@ class Command(textpad.Textbox):
         #self.text_box = _Textbox(self._input_field, insert_mode=True)
 
         if 'nix_edit' in self._item:
-            self._place_holder = self._format_command(
+            self._org_command = self._format_command(
                 self._item['nix_edit']['mask'],
                 self._item['nix_edit']['args']
             )
         else:
-            self._place_holder = self._item['command']
+            self._org_command = self._item['command']
 
-        self._pplace_holder = self._place_holder
-        self._org_command = self._place_holder
-        self._print_command(self._place_holder)
+        self._print_command(self._org_command)
 
         textpad.Textbox.__init__(self, *args, **kwargs)
 
     def do_command(self, ch):
         """Extend `Textbox` `do_command` method."""
 
-        regex_fail = False
-        """If `_adjust_index_tab` cannot handle character."""
-
-        ret_val = None
-        """Return `do_command` from the future."""
+        cy, cx = self._input_field.getyx()
+        """Cursor position within this line."""
 
         if ch in bindings.edit_term:
-            self._tab_marked = False # Agreed or mark previous cursor position?
+            # Termination keys. Leave input_field.
+            # TODO: Mark prev cursor position?
             return 0
-        # elif ch == bindings.ALT_B:
-        #     #pass
-        #     cy, cx = self._input_field.getyx()
-        #     self._input_field.move(0, cx - 5)
-        #     return 1
-        # elif ch == bindings.ALT_F:
-        #     #pass
-        #     cy, cx = self._input_field.getyx()
-        #     self._input_field.move(0, cx + 5)
-        #     return 1
-        elif ch == bindings.TAB:
-            # Cursor position y, x.
-            cy, cx = self._input_field.getyx()
-            # Detect cursor position and move tab to the next nearest field.
+
+        if self._prev_ch == bindings.ESC:
+            if ch == bindings.ESC:
+                # Leaving input on double ESC.
+                return 0
+            elif ch in (bindings.ALT_KEYS):
+                ret_val = self._super_return(0, ch)
+                return ret_val
+            #else: Treat the rest as _prev_ch was not ESC key. Ignore or cont?
+
+        if ch == bindings.ESC:
+            ret_val = self._super_return(1, ch)
+            return ret_val
+        elif self._prev_ch in bindings.tabs:
+            # Do not override previous TAB character.
+            pass
+        else:
+            # Sets previous character to non-ESC key.
+            ret_val = self._super_return(1, ch)
+
+        if ch in bindings.tabs:
+            # Move cursor to the next nearest tab field.
             selected_word_index, next_field = self._find_next_field(
                 cx,
                 self._index_tab
@@ -142,91 +145,85 @@ class Command(textpad.Textbox):
                 self._selected_word = ''
                 next_field = cx
 
-            # Highlighting and selecting text with python curses [1]
-            # [1]: http://stackoverflow.com/questions/6807808/highlighting-and-selecting-text-with-python-curses
-
-            """
-            command_field[index].addnstr(
-                0,
-                next_field,
-                self._selected_word,
-                len(self._selected_word),
-                curses.A_REVERSE
-            )
-            command_field[index].insstr(
-                0,
-                next_field,
-                self._selected_word,
-                curses.A_REVERSE
-            )
-            """
-
-            """
-            command_field[index].chgat(
-                0,
-                next_field,
-                len(self._selected_word),
-                curses.A_REVERSE
-            )
-            """
-
             self._input_field.move(0, next_field)
-
-            self._tab_marked = True
+            # TODO: Mark current word.
+            #self._mark_word(cx, self._selected_word)
             return textpad.Textbox.do_command(self, ch)
+
+        if ch in bindings.moving:
+            return textpad.Textbox.do_command(self, ch)
+
+        if ch in bindings.editing:
+            self._edit(cx, ch)
+            return 1
+
+
+
+        if ch == bindings.BACKSLASH:
+            character = '\\\\'
+            cx += 1
+        elif ch in bindings.backspace:
+            reformat = True
+            self._org_command = (self._org_command[:cx - 1] +
+                self._org_command[cx:])
+            ch = bindings.CTRL_H
+        elif ch in bindings.delete:
+            reformat = True
+            self._org_command = (self._org_command[:cx] +
+                self._org_command[cx + 1:])
+            ch = bindings.CTRL_D
+        elif ch in bindings.yank:
+            # paste
+            self._org_command = (self._org_command[:cx] +
+                str(self._yank) + self._org_command[cx:])
+            self._put_chars(str(self._yank))
+            return 1
         else:
-            # Remove marking from word, if non accumulative character.
-            # Otherwise recalculate index_tab.
-            regex_fail = False
-            if ch in bindings.NON_CHANGING:
-                self._tab_marked = False
-            else:
-                ch, regex_fail, ret_val = self._adjust_index_tab(ch)
+            try:
+                character = chr(ch)
+            except ValueError:
+                regex_fail = True
 
-        if self._tab_marked:
+        if reformat:
+            pass
+        else:
+            if regex_fail is False:
+                try:
+                    self._org_command = re.sub(
+                        r'(^.{' + str(cx) + '})',
+                        r'\g<1>' + character,
+                        self._org_command
+                    )
+                    stdscr.addstr(18 + self._line_number, 0, str(1))
+                    stdscr.refresh()
+                except sre_constants.error:
+                    # Rough exit. Read self._input_field.instr(0, 0), set
+                    # cursor to original position. Hope this never happen.
+                    regex_fail = True
+                except UnicodeDecodeError:
+                    regex_fail = True
+
+            if regex_fail:
+                # We are lost. Read the command from _input_field.
+                ret_val = textpad.Textbox.do_command(self, ch)
+                cy, cx = self._input_field.getyx()
+                self._org_command = self._input_field.instr(0, 0)
+                self._input_field.move(0, cx)
+
+
+        ch, regex_fail, ret_val = self._adjust_index_tab(ch)
+
+
+
+
+
+        if self._prev_ch in bindings.tabs:
             # Delete the marked word.
-            self._tab_marked = False
             arg_len = len(self._selected_word)
-
-            cy, cx = self._input_field.getyx()
             self._org_command = (self._org_command[:cx] +
                 chr(ch) + self._org_command[cx + 1 + arg_len:])
-
-            stdscr.move(18 + self._line_number, 0)
-            stdscr.clrtoeol()
-            stdscr.addstr(18 + self._line_number, 4, self._org_command)
-            stdscr.refresh()
-
             self._delete_chars(arg_len)
 
-            #regex_fail = True
-            #ret_val = textpad.Textbox.do_command(self, bindings.CTRL_D)
-
-            #self._pplace_holder = self._input_field.instr(0, 0)
-
-            #stdscr.move(2, 1)
-            #stdscr.clrtoeol()
-            #stdscr.addstr(2, 2, self._pplace_holder)
-            #stdscr.refresh()
-
-            #self._input_field.move(0, cx)
-
-            # Save just from unmodified part till end.
-            # Get before change, so we know the state before changed.
-            #self._pplace_holder = self._input_field.instr()
-
-            #for i in range(arg_len):
-            #    textpad.Textbox.do_command(self, bindings.CTRL_D)
-
-            # # Save just from unmodified part till end. ?? This is wrong!
-            # self._pplace_holder = self._input_field.instr()
-
-            #stdscr.move(2, 1)
-            #stdscr.clrtoeol()
-            #stdscr.addstr(2, 2, self._pplace_holder)
-            #stdscr.refresh()
-
-        #self._pplace_holder = self._place_holder
         if regex_fail:
             return ret_val
         return textpad.Textbox.do_command(self, ch)
@@ -237,15 +234,11 @@ class Command(textpad.Textbox):
 
         Updates followin structures:
 
-        - `tab_args`
-        - `tab_value`
-        - `index_tab`
+        - `_tab_args`
+        - `_tab_value`
+        - `_index_tab`
         """
         # TODO: Create new tab value for new arguments.
-        cy, cx = self._input_field.getyx()
-        regex_fail = False
-        ret_val = None
-        reformat = False
 
         #is_changed, prev_arg, start_idx, end_idx = _detect_broken_args()
 
@@ -261,85 +254,6 @@ class Command(textpad.Textbox):
 
         # Escaping regex string in python [5]
         # [5]: http://stackoverflow.com/questions/280435/escaping-regex-string-in-python
-        if ch > -1:
-            if ch == bindings.BACKSLASH:
-                character = '\\\\'
-                cx += 1
-            elif ch in bindings.backspace:
-                reformat = True
-                self._org_command = (self._org_command[:cx - 1] +
-                    self._org_command[cx:])
-                ch = bindings.CTRL_H
-            elif ch in bindings.delete:
-                reformat = True
-                self._org_command = (self._org_command[:cx] +
-                    self._org_command[cx + 1:])
-                ch = bindings.CTRL_D
-            elif ch == bindings.CTRL_K:
-                reformat = True
-                self._yank = self._org_command[cx:]
-                self._org_command = self._org_command[:cx]
-                self._delete_chars(len(self._yank))
-            elif ch == bindings.CTRL_U:
-                reformat = True
-                self._yank = self._org_command[:cx]
-                self._org_command = self._org_command[cx:]
-                self._delete_chars(len(self._yank), 0)
-            elif ch == bindings.CTRL_W:
-                reformat = True
-                p = re.compile(r'\s.?\w')
-                _s = [m.start() for m in p.finditer(self._org_command, 0, cx)]
-                try:
-                    _s = _s[-1]
-                    _s += 1
-                except IndexError:
-                    _s = 0
-                self._yank = self._org_command[_s:cx]
-                self._org_command = (self._org_command[:_s] +
-                    self._org_command[cx:])
-                self._delete_chars(len(self._yank), _s)
-            elif ch in bindings.yank:
-                # paste
-                reformat = True
-                #ch = bindings.CTRL_Y
-                self._org_command = (self._org_command[:cx] +
-                    str(self._yank) + self._org_command[cx:])
-                self._put_chars(str(self._yank))
-            else:
-                try:
-                    character = chr(ch)
-                except ValueError:
-                    regex_fail = True
-
-            if reformat:
-                pass
-            else:
-                if regex_fail is False:
-                    try:
-                        self._org_command = re.sub(
-                            r'(^.{' + str(cx) + '})',
-                            r'\g<1>' + character,
-                            self._org_command
-                        )
-                        stdscr.addstr(18 + self._line_number, 0, str(1))
-                        stdscr.refresh()
-                    except sre_constants.error:
-                        # Rough exit. Read self._input_field.instr(0, 0), set
-                        # cursor to original position. Hope this never happen.
-                        regex_fail = True
-                    except UnicodeDecodeError:
-                        egex_fail = True
-
-                if regex_fail:
-                    ret_val = textpad.Textbox.do_command(self, ch)
-                    cy, cx = self._input_field.getyx()
-                    self._org_command = self._input_field.instr(0, 0)
-                    self._input_field.move(0, cx)
-
-        stdscr.move(18 + self._line_number, 0)
-        stdscr.clrtoeol()
-        stdscr.addstr(18 + self._line_number, 4, self._org_command)
-        stdscr.refresh()
 
         self._index_tab = []
         for key, value in self._tab_args.iteritems():
@@ -356,8 +270,6 @@ class Command(textpad.Textbox):
 
             self._index_tab = sorted(list(set(
                 self._index_tab + self._tab_args[key])))
-
-        return (ch, regex_fail, ret_val)
 
     def _calculate_new_index_tab(self, prev, curr):
         """Difference between previous and current command."""
@@ -466,6 +378,37 @@ class Command(textpad.Textbox):
         #stdscr.addstr(19 + self._line_number, 0, str(self._tab_args))
         #stdscr.refresh()
 
+    def _edit(self, cx, ch):
+        """Puts removed characters before/after cursor in yank."""
+        _s = -1
+        self._yank = ''
+
+        if ch == bindings.CTRL_K:
+            self._yank = self._org_command[cx:]
+            self._org_command = self._org_command[:cx]
+        elif ch == bindings.CTRL_U:
+            _s = 0
+            self._yank = self._org_command[:cx]
+            self._org_command = self._org_command[cx:]
+        elif ch == bindings.CTRL_W:
+            _s = self._prev_word(cx)
+            self._yank = self._org_command[_s:cx]
+            self._org_command = (self._org_command[:_s] +
+                self._org_command[cx:])
+
+        return self._delete_chars(len(self._yank), _s)
+
+    def _prev_word(self, cx):
+        """Return starting index of previous word."""
+        p = re.compile(r'\s.?\w')
+        _s = [m.start() for m in p.finditer(self._org_command, 0, cx)]
+        try:
+            _s = _s[-1]
+            _s += 1
+        except IndexError:
+            _s = 0
+        return _s
+
     def _find_next_field(self, index, tab_field):
         """Return tuple, index & position of next edible argument on <TAB>."""
         if len(tab_field) < 1:
@@ -525,6 +468,37 @@ class Command(textpad.Textbox):
         """Public method return input field. Used to control cursor."""
         return self._input_field
 
+    def _mark_word(self, cx, selected_word):
+        # Highlighting and selecting text with python curses [1]
+        # [1]: http://stackoverflow.com/questions/6807808/highlighting-and-selecting-text-with-python-curses
+        """
+        command_field[index].addnstr(
+            0,
+            next_field,
+            selected_word,
+            len(selected_word),
+            curses.A_REVERSE
+        )
+        command_field[index].insstr(
+            0,
+            next_field,
+            selected_word,
+            curses.A_REVERSE
+        )
+        """
+
+        """
+        command_field[index].chgat(
+            0,
+            next_field,
+            len(selected_word),
+            curses.A_REVERSE
+        )
+        """
+        pass
+
+
+
     def _reformat_command(self):
         """Reformats current state of a command to match edible state."""
         # Match text inside single and/or double quotes.
@@ -547,3 +521,8 @@ class Command(textpad.Textbox):
         """Inserts n characters in a string."""
         for chy in yank:
             textpad.Textbox.do_command(self, chy)
+
+    def _super_return(self, ret_val, ch):
+        """Only exit point from the graph."""
+        self._prev_ch = ch
+        return ret_val

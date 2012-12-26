@@ -5,7 +5,6 @@ import command_
 from db import data_json as data
 
 # TODO: Replace current tags field with Textbox.
-# TODO: Replace string in history.
 
 # Global list of commands that instanciate class Command.
 commands = []
@@ -52,7 +51,6 @@ def display_description(idx):
 
 def edit_command(idx):
     """Calls `Command`'s `texbox.edit()`."""
-
     global commands
 
     pad = 7

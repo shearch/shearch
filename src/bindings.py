@@ -2,8 +2,8 @@
 
 # Breaking coding style here (excessive whitespace).
 # Hex values from (http://www.bbdsoft.com/ascii.html)
-ALT_B     = 0x62  # Back one word.
-ALT_F     = 0x66  # Forward one word.
+KEY_B     = 0x62
+KEY_F     = 0x66
 BACKSLASH = 0x5c
 BACKSPACE = 0x7F
 COMMA     = 0x2c
@@ -32,11 +32,19 @@ KEY_RIGHT = 0x105
 KEY_UP    = 0x103
 RETURN    = 0xa
 SPACE     = 0x20
-STAB      = 0x161
+STAB      = 0x161 # Shift Tab.
 TAB       = 0x9
 
 # TODO: OS X CTRL_Y bug. *Not* a bug but behavior. $ stty dsusp undef
 ALT_SHIFT_Y = 0x81
+
+# OS X hacks.
+ALT_KEYS = (BACKSPACE, KEY_B, KEY_C, KEY_D, KEY_F, KEY_L, KEY_R, KEY_T, KEY_U)
+
+editing = (CTRL_K, CTRL_U, CTRL_W)
+
+moving = (CTRL_A, CTRL_B, CTRL_E, CTRL_F, KEY_HOME,
+    KEY_END, KEY_LEFT, KEY_RIGHT)
 
 next = (KEY_DOWN, CTRL_N)
 prev = (KEY_UP, CTRL_P)
@@ -58,6 +66,3 @@ edit_term = (KEY_DOWN, CTRL_N, KEY_UP, CTRL_P, RETURN, ENTER)
 tabs = (TAB, STAB)
 
 yank = (CTRL_Y, ALT_SHIFT_Y)
-
-NON_CHANGING = (CTRL_A, CTRL_B, CTRL_E, CTRL_F, CTRL_N, CTRL_P, KEY_DOWN,
-    KEY_HOME, KEY_END, KEY_LEFT, KEY_RIGHT, KEY_UP)
