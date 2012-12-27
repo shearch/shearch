@@ -200,6 +200,7 @@ class Command(textpad.Textbox):
             self._shadow_command = (self._shadow_command[:cx] +
                 str(self._yank) + self._shadow_command[_e:])
             self._put_chars(str(self._yank))
+            self._adjust_index_tab()
             return self._super_return(1, 0)
         else:
             try:
@@ -503,8 +504,6 @@ class Command(textpad.Textbox):
         )
         """
         pass
-
-
 
     def _reformat_command(self):
         """Reformats current state of a command to match edible state."""
