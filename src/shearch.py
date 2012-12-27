@@ -1,3 +1,6 @@
+# $Id
+# Author: Ziga Zupanec <ziga.zupanec@gmail.com>
+
 import curses
 
 import bindings
@@ -6,10 +9,11 @@ from db import data_json as data
 
 # TODO: Replace current tags field with Textbox.
 
-# Global list of commands that instanciate class Command.
 commands = []
-# Global list of input_fields.
+"""Global list of commands that instanciate class Command."""
+
 input_fields = []
+"""Global list of input_fields."""
 
 def parse_tags(tag_field):
     """Retrieves commands that matches entered tags."""
@@ -93,19 +97,22 @@ stdscr.refresh()
 
 # TODO: Remove this debug hack.
 command_.stdscr = stdscr
+"""Set Command's global, main terminal screen."""
 
-# Cursor index.
-i = 9
-# Maximum tag field length.
-max_i = i
-# Current character.
+max_i = 9
+"""Maximum tag field length."""
+
 key = ''
-# Tag field.
+"""Current character."""
+
 tag_field = ''
-# Command line asterix number.
-asterix = 6
-# Offset where commands are displayed
+"""Input field for tags."""
+
+asterisk = 6
+"""Current asterisk position."""
+
 pad = 7
+"""Offset where commands are displayed."""
 
 while key not in bindings.enter:
     key = stdscr.getch()
@@ -113,15 +120,15 @@ while key not in bindings.enter:
     stdscr.refresh()
 
     if key in bindings.prev:
-        stdscr.addstr(asterix, 2, ' ')
-        asterix -= 1
-        stdscr.addstr(asterix, 2, '*')
-        display_description(asterix)
+        stdscr.addstr(asterisk, 2, ' ')
+        asterisk -= 1
+        stdscr.addstr(asterisk, 2, '*')
+        display_description(asterisk)
     elif key in bindings.next:
-        stdscr.addstr(asterix, 2, ' ')
-        asterix += 1
-        stdscr.addstr(asterix, 2, '*')
-        display_description(asterix)
+        stdscr.addstr(asterisk, 2, ' ')
+        asterisk += 1
+        stdscr.addstr(asterisk, 2, '*')
+        display_description(asterisk)
     elif key in bindings.back:
         if max_i > 7:
             max_i -= 1
@@ -135,8 +142,8 @@ while key not in bindings.enter:
         parse_tags(tag_field)
         tag_field += ' '
     elif key == bindings.TAB:
-        stdscr.addstr(15, 15, str(asterix))
-        edit_command(asterix)
+        stdscr.addstr(15, 15, str(asterisk))
+        edit_command(asterisk)
     elif key <= 0xff:
         max_i += 1
         tag_field += chr(key)
