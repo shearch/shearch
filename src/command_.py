@@ -271,7 +271,7 @@ class Command(textpad.Textbox):
         #is_changed, prev_arg, start_idx, end_idx = _detect_broken_args()
         self._index_tab = []
         for key, value in self._tab_args.iteritems():
-            kw = r'\b' + key + r'\b'
+            kw = r'\b' + re.escape(key)
             self._tab_args[key] = [m.start() for m in re.finditer(
                 kw, self._shadow_command)]
 
