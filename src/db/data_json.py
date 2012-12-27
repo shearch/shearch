@@ -11,14 +11,14 @@ json_file = os.path.join(os.path.dirname(__file__), 'example.json')
 json_data = open(json_file)
 data = json.load(json_data)
 
-# Key is tag, value is hash command.
 db = {}
+"""Key is tag, value is hash command."""
 
-# Key is hash command, value is item
 command = {}
+"""Key is hash command, value is item."""
 
-# Array of all keys (to be used with sets).
 uberset = set()
+"""# Array of all keys (to be used with sets)."""
 
 for item in data['item']:
     key = hash(item['command'])

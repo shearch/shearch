@@ -97,7 +97,9 @@ class Command(textpad.Textbox):
         self._center = False
         """Center for tab arguments."""
 
-        self._myoff = self._xmax - self._y_offset
+        self._right_edge = self._xmax - self._y_offset
+        """_x_ position of right edge."""
+
         self._curr_offset = 0
         """Relative _x_ offset."""
 
@@ -143,10 +145,16 @@ class Command(textpad.Textbox):
 
         if ch in bindings.tabs:
             # Move cursor to the next nearest tab field.
-            selected_word_index, next_field = self._find_next_field(
-                cx,
-                self._index_tab
-            )
+            if ch == bindings.TAB:
+                selected_word_index, next_field = self._find_next_field(
+                    cx,
+                    self._index_tab
+                )
+            else:
+                selected_word_index, next_field = self._find_prev_field(
+                    cx,
+                    self._index_tab
+                )
             try:
                 self._selected_word = self._tab_value[next_field]
             except KeyError:
@@ -167,7 +175,7 @@ class Command(textpad.Textbox):
         if ch in bindings.editing:
             return self._super_return(self._edit(cx, ch), 0)
 
-        # Characters from now on assumed invasive.
+        # Characters from now on considered invasive.
         _e = cx # End position. Replacing marked word changes that.
         chr_fail = False
         clear_word = False
@@ -181,7 +189,7 @@ class Command(textpad.Textbox):
 
         if ch == bindings.BACKSLASH:
             character = '\\\\'
-            _e += 1 # Increase _e too?
+            _e += 1
         elif ch in bindings.backspace:
             insert_char = False
             if clear_word:
@@ -225,8 +233,8 @@ class Command(textpad.Textbox):
         if insert_char:
             try:
                 self._shadow_command = (self._shadow_command[:cx] +
-                    character +
-                    self._shadow_command[_e:])
+                                        character +
+                                        self._shadow_command[_e:])
             except UnicodeDecodeError:
                 return self._super_return(1, 0)
 
@@ -247,21 +255,25 @@ class Command(textpad.Textbox):
                 break
 
             cy, cx = self._input_field.getyx()
-            if cx - self._myoff > self._curr_offset:
-                self._curr_offset = cx - self._myoff
+            if cx - self._right_edge > self._curr_offset:
+                self._curr_offset = cx - self._right_edge
             elif cx < self._curr_offset:
                 self._curr_offset = cx
             if self._center:
                 self._center = False
                 tab_offset = self._tab_offset
-                if cx - self._curr_offset < self._myoff:
+                if cx - self._curr_offset < self._right_edge:
                     tab_offset = (cx - self._curr_offset -
-                        (self._myoff - tab_offset))
+                                 (self._right_edge - tab_offset))
                 self._curr_offset += tab_offset
             self.win.refresh(0, self._curr_offset, self._line_number,
-                self._y_offset, self._line_number, self._xmax)
+                             self._y_offset, self._line_number, self._xmax)
 
         return self.gather()
+
+    def get_input_field(self):
+        """Public method return input field. Used to control cursor."""
+        return self._input_field
 
     def _adjust_index_tab(self):
         """
@@ -295,8 +307,8 @@ class Command(textpad.Textbox):
         """Difference between previous and current command."""
         stdscr.addstr(12, 2, prev)
         stdscr.addstr(13, 2, curr)
-        # Difference between two strings in python [6]
-        # [6]: http://stackoverflow.com/questions/1209800/difference-between-two-strings-in-python-php
+        # Difference between two strings in python [1]
+        # [1]: http://stackoverflow.com/questions/1209800/difference-between-two-strings-in-python-php
         diff = difflib.SequenceMatcher(
             a=prev,
             b=curr
@@ -416,34 +428,23 @@ class Command(textpad.Textbox):
         self._adjust_index_tab()
         return self._delete_chars(len(self._yank), _s)
 
-    def _next_word(self, cx):
-        """Return starting index of next word."""
-        p = re.compile(r'\w+\b')
-        _s = [m.start() for m in p.finditer(self._shadow_command, cx)]
-        try:
-            _s = _s[1]
-        except IndexError:
-            _s = len(self._shadow_command)
-        return _s
-
-    def _prev_word(self, cx):
-        """Return starting index of previous word."""
-        p = re.compile(r'\w+\b')
-        _s = [m.start() for m in p.finditer(self._shadow_command, 0, cx)]
-        try:
-            _s = _s[-1]
-        except IndexError:
-            _s = 0
-        return _s
-
-    def _find_next_field(self, index, tab_field):
+    def _find_next_field(self, cx, tab_field):
         """Return tuple, index & position of next edible argument on <TAB>."""
         if len(tab_field) < 1:
             return (0, -1)
         for n, i in enumerate(tab_field):
-            if i > index:
+            if i > cx:
                 return (n, i)
         return (0, tab_field[0])
+
+    def _find_prev_field(self, cx, tab_field):
+        """Return tuple, index, position of prev edible argument on <STAB>."""
+        if len(tab_field) < 1:
+            return (0, -1)
+        for n, i in reversed(list(enumerate(tab_field))):
+            if i < cx:
+                return (n, i)
+        return (len(tab_field) - 1, tab_field[-1])
 
     def _format_command(self, command, args):
         """
@@ -487,13 +488,10 @@ class Command(textpad.Textbox):
 
         return ''.join(holders)
 
-    def get_input_field(self):
-        """Public method return input field. Used to control cursor."""
-        return self._input_field
-
     def _mark_word(self, cx, selected_word):
-        # Highlighting and selecting text with python curses [1]
-        # [1]: http://stackoverflow.com/questions/6807808/highlighting-and-selecting-text-with-python-curses
+        """Invert colors on marked word."""
+        # Highlighting and selecting text with python curses [2]
+        # [2]: http://stackoverflow.com/questions/6807808/highlighting-and-selecting-text-with-python-curses
         """
         command_field[index].addnstr(
             0,
@@ -520,11 +518,25 @@ class Command(textpad.Textbox):
         """
         pass
 
-    def _reformat_command(self):
-        """Reformats current state of a command to match edible state."""
-        # Match text inside single and/or double quotes.
-        #re.split(r'''("(?:[^\\"]+|\\.)*")|('(?:[^\\']+|\\.)*')''', nstr)
-        pass
+    def _next_word(self, cx):
+        """Return starting index of next word."""
+        p = re.compile(r'\w+\b')
+        _s = [m.start() for m in p.finditer(self._shadow_command, cx)]
+        try:
+            _s = _s[1]
+        except IndexError:
+            _s = len(self._shadow_command)
+        return _s
+
+    def _prev_word(self, cx):
+        """Return starting index of previous word."""
+        p = re.compile(r'\w+\b')
+        _s = [m.start() for m in p.finditer(self._shadow_command, 0, cx)]
+        try:
+            _s = _s[-1]
+        except IndexError:
+            _s = 0
+        return _s
 
     def _print_command(self, command):
         """Print command in the commands list in main terminal window."""
@@ -543,6 +555,12 @@ class Command(textpad.Textbox):
         """Inserts n characters in a string."""
         for chy in yank:
             textpad.Textbox.do_command(self, chy)
+
+    def _reformat_command(self):
+        """Reformats current state of a command to match edible state."""
+        # Match text inside single and/or double quotes.
+        #re.split(r'''("(?:[^\\"]+|\\.)*")|('(?:[^\\']+|\\.)*')''', nstr)
+        pass
 
     def _super_return(self, ret_val, ch):
         """Only exit point from the graph."""
