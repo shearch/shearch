@@ -1,12 +1,11 @@
 # $Id
 # Author: Ziga Zupanec <ziga.zupanec@gmail.com>
-# Copyright: This module has been placed in the public domain.
 
 """
 Textbox subclass for easier text manipulation, this module defines
 the following class:
 
-- `Command`, meta-data about shell command.
+- `Command`: `Textbox` subclass. Improved word traversal.
 
 
 How To Use This Module
@@ -43,11 +42,28 @@ class Command(textpad.Textbox):
     `Textbox` subclass with methods for smooth text editing.
 
     Command contains methods for simpler text formatting and string
-    manipulation.
+    manipulation. Implemented standard - EMACS(?) shortcuts for word
+    traversal and editing.
+
+    ALT_B : Back, left one word.
+    ALT_F : Forward, right one word.
+    CTRL_A: Beginning of the line (Home).
+    CTRL_B: Back one character.
+    CTRL_D: Delete.
+    CTRL_E: End of the line (End).
+    CTRL_F: Forward one character.
+    CTRL_H: Backspace.
+    CTRL_K: Cut line after cursor to clipboard.
+    CTRL_U: Cut line before cursor to clipboard.
+    CTRL_W: Cut word before cursor to clipboard.
+    CTRL_Y: Yank (paste). DSUSP, delayed suspend on BSD-based systems.
+    TAB   : Cycle through command arguments.
+    STAB  : Reverse cycle through command arguments.
     """
 
     # TODO: Remove this debug hack.
     stdscr = None
+    """Global, main terminal screen."""
 
     def __init__(self, item, box, input_field, tab_offset, *args, **kwargs):
         """
