@@ -287,9 +287,19 @@ class Command(textpad.Textbox):
 
         return self.gather()
 
+    def get_command(self):
+        return self._shadow_command
+
     def get_input_field(self):
         """Public method return input field. Used to control cursor."""
         return self._input_field
+
+    def print_description(self):
+        """Print command description in main terminal window."""
+        stdscr.move(2, 1)
+        stdscr.clrtoeol()
+        stdscr.addstr(2, 2, self._item['description'])
+        stdscr.refresh()
 
     def _adjust_index_tab(self):
         """
@@ -548,13 +558,6 @@ class Command(textpad.Textbox):
         self._input_field.addstr(0, 0, command)
         self._input_field.refresh(0, 0, self._line_number,
             self._y_offset, self._line_number, self._xmax)
-
-    def print_description(self):
-        """Print command description in main terminal window."""
-        stdscr.move(2, 1)
-        stdscr.clrtoeol()
-        stdscr.addstr(2, 2, self._item['description'])
-        stdscr.refresh()
 
     def _put_chars(self, yank):
         """Inserts n characters in a string."""
