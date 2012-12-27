@@ -321,8 +321,6 @@ class Command(textpad.Textbox):
 
     def _calculate_new_index_tab(self, prev, curr):
         """Difference between previous and current command."""
-        stdscr.addstr(12, 2, prev)
-        stdscr.addstr(13, 2, curr)
         # Difference between two strings in python [1]
         # [1]: http://stackoverflow.com/questions/1209800/difference-between-two-strings-in-python-php
         diff = difflib.SequenceMatcher(
@@ -331,8 +329,6 @@ class Command(textpad.Textbox):
         )
         for i, block in enumerate(diff.get_matching_blocks()):
             nstr = "match at a[%d] and b[%d] of length %d" % block
-            stdscr.addstr(14 + i, 2, nstr)
-        stdscr.refresh()
 
     def _clear_input_field(self):
         """Clear input field."""
@@ -411,13 +407,6 @@ class Command(textpad.Textbox):
                 prev_arg = self._tab_value[n_lo]
                 start_idx = n_lo
                 end_idx = n_hi
-
-            stdscr.addstr(
-                self._line_number + 12,
-                0,
-                'override: ' + str(cx) + ' ' + prev_arg
-            )
-            stdscr.refresh()
 
             # Figure if word is in tab_args
             # Figure out changes of that word.
