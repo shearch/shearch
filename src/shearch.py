@@ -23,7 +23,7 @@ def parse_tags(tag_field):
         if n >= len(input_fields):
             # Add new input field at the end if there are none left available.
             ymax, xmax = stdscr.getmaxyx()
-            tmp_scr    = stdscr.derwin(1, xmax - 18, n + pad, 4)
+            tmp_scr    = stdscr.derwin(1, xmax - 4, n + pad, 4)
             input_fields.append(tmp_scr)
 
         command = command_.Command(
