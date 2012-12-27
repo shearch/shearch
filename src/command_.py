@@ -138,6 +138,12 @@ class Command(textpad.Textbox):
                 next_field = cx
 
             self._input_field.move(0, next_field)
+            self.win.move(0, next_field)
+            curses.doupdate()
+            #self.pad.refresh(self.y_offset, self.x_offset, self.top, self.left, self.height, self.width)
+            self.win.refresh(0, next_field, self._line_number + 7, 99, self._line_number + 7, 100)
+            self._input_field.refresh(0, next_field, self._line_number + 7, 99, self._line_number + 7, 100)
+            curses.doupdate()
             # TODO: Mark current word.
             #self._mark_word(cx, self._selected_word)
             return self._super_return(
@@ -211,6 +217,19 @@ class Command(textpad.Textbox):
         self._adjust_index_tab()
 
         return self._super_return(ret_val, 0)
+
+    def edit(self, validate=None):
+        "Edit in the widget window and collect the results."
+        while 1:
+            ch = self.win.getch()
+            if validate:
+                ch = validate(ch)
+            if not ch:
+                continue
+            if not self.do_command(ch):
+                break
+            self.win.refresh(0, 0, self._line_number + 7, 5, self._line_number + 7, 100)
+        return self.gather()
 
     def _adjust_index_tab(self):
         """
@@ -478,7 +497,9 @@ class Command(textpad.Textbox):
     def _print_command(self, command):
         """Print command in the commands list in main terminal window."""
         self._input_field.addstr(command)
-        self._input_field.refresh()
+        #self._input_field.refresh()
+        #self.pad.refresh(self.y_offset, self.x_offset, self.top, self.left, self.height, self.width)
+        self._input_field.refresh(0, 0, self._line_number + 7, 5, self._line_number + 7, 100)
 
     def print_description(self):
         """Print command description in main terminal window."""
