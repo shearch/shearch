@@ -19,17 +19,30 @@ def parse_tags(tag_field):
     commands = []
     items = data.get_commands(tag_field.split(' '))
 
+    n_cols = 500
+    """Virtual window character width."""
+
+    y_offset = 5
+    """_y_ offset from left terminal screen edge."""
+
+    y_max, x_max = stdscr.getmaxyx()
+    x_max -= 2 # Must at least be -1 (window inside window).
+    """Character width of current terminal screen."""
+
+    tab_offset = int(0.75 * x_max)
+    """Number of characters tab characters to show."""
+
     for n, item in enumerate(items):
         if n >= len(input_fields):
             # Add new input field at the end if there are none left available.
-            ymax, xmax = stdscr.getmaxyx()
-            tmp_scr    = stdscr.derwin(1, xmax - 4, n + pad, 4)
+            tmp_scr = curses.newpad(1, n_cols)
             input_fields.append(tmp_scr)
 
         command = command_.Command(
             item,
-            n,
+            (n + pad, y_offset, x_max),
             input_fields[n],
+            tab_offset,
             input_fields[n],
             insert_mode=True
         )
@@ -67,6 +80,7 @@ def edit_command(idx):
 stdscr = curses.initscr()
 stdscr.box()
 #curses.cbreak()
+#curses.nocbreak()
 curses.noecho()
 #curses.echo()
 # Hide cursor.
