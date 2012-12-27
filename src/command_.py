@@ -128,6 +128,12 @@ class Command(textpad.Textbox):
                 # Leaving input on double ESC.
                 return 0
             elif ch in (bindings.ALT_KEYS):
+                if ch == bindings.KEY_B:
+                    _s = self._prev_word(cx)
+                    self._input_field.move(0, _s)
+                elif ch == bindings.KEY_F:
+                    _s = self._next_word(cx)
+                    self._input_field.move(0, _s)
                 self._adjust_index_tab()
                 return self._super_return(1, 0)
             #else: Treat the rest as _prev_ch was not ESC key. Ignore or cont?
@@ -410,13 +416,22 @@ class Command(textpad.Textbox):
         self._adjust_index_tab()
         return self._delete_chars(len(self._yank), _s)
 
+    def _next_word(self, cx):
+        """Return starting index of next word."""
+        p = re.compile(r'\w+\b')
+        _s = [m.start() for m in p.finditer(self._shadow_command, cx)]
+        try:
+            _s = _s[1]
+        except IndexError:
+            _s = len(self._shadow_command)
+        return _s
+
     def _prev_word(self, cx):
         """Return starting index of previous word."""
-        p = re.compile(r'\s.?\w')
+        p = re.compile(r'\w+\b')
         _s = [m.start() for m in p.finditer(self._shadow_command, 0, cx)]
         try:
             _s = _s[-1]
-            _s += 1
         except IndexError:
             _s = 0
         return _s
