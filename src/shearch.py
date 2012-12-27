@@ -1,3 +1,4 @@
+#!/usr/bin/python
 # $Id
 # Author: Ziga Zupanec <ziga.zupanec@gmail.com>
 
