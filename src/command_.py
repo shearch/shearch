@@ -49,20 +49,25 @@ class Command(textpad.Textbox):
     # TODO: Remove this debug hack.
     stdscr = None
 
-    def __init__(self, item, line_number, input_field, *args, **kwargs):
+    def __init__(self, item, box, input_field, tab_offset, *args, **kwargs):
         """
         Extend `Textbox` `__init__` method. Initialize a `Command` object.
 
         Parameters:
 
         - `item`: a dictionary containing command, description, tags.
-        - `line_number`: vertical line command is displayed in terminal.
+        - `box`:
+            - `_line_number`: Number of row command is rendered in terminal.
+            - `_y_offset`: _y_ offset from left terminal screen edge.
+            - `_xmax`: Maximum screen size, _x_ axis.
         - `input_field`: edible window (one line).
+        - `tab_offset`: Number of characters tab characters to show.
         """
 
         self._item = item
-        self._line_number = line_number
+        self._line_number, self._y_offset, self._xmax = box
         self._input_field = input_field
+        self._tab_offset = tab_offset
 
         self._tab_value = {}
         """Dictionary of indexes of words (arguments) that are tabbable.
@@ -89,7 +94,12 @@ class Command(textpad.Textbox):
         self._yank = ''
         """Holds content of cut string to paste."""
 
-        #self.text_box = _Textbox(self._input_field, insert_mode=True)
+        self._center = False
+        """Center for tab arguments."""
+
+        self._myoff = self._xmax - self._y_offset
+        self._curr_offset = 0
+        """Relative _x_ offset."""
 
         if 'nix_edit' in self._item:
             self._shadow_command = self._format_command(
@@ -138,6 +148,7 @@ class Command(textpad.Textbox):
                 next_field = cx
 
             self._input_field.move(0, next_field)
+            self._center = True
             # TODO: Mark current word.
             #self._mark_word(cx, self._selected_word)
             return self._super_return(
@@ -159,26 +170,31 @@ class Command(textpad.Textbox):
         if self._prev_ch in bindings.tabs:
             clear_word = True
             arg_len = len(self._selected_word)
-            _e = cx + 1 + arg_len
+            _e = cx + arg_len
             self._delete_chars(arg_len)
 
         if ch == bindings.BACKSLASH:
             character = '\\\\'
-            cx += 1
             _e += 1 # Increase _e too?
         elif ch in bindings.backspace:
             insert_char = False
+            if clear_word:
+                self._shadow_command = (self._shadow_command[:cx - 1] +
+                    self._shadow_command[_e - 1:])
+                self._adjust_index_tab()
+                return self._super_return(1, 0)
             self._shadow_command = (self._shadow_command[:cx - 1] +
                 self._shadow_command[_e:])
-            if clear_word:
-                return self._super_return(1, 0)
             ch = bindings.CTRL_H
         elif ch in bindings.delete:
             insert_char = False
+            if clear_word:
+                self._shadow_command = (self._shadow_command[:cx - 1] +
+                    self._shadow_command[_e - 1:])
+                self._adjust_index_tab()
+                return self._super_return(1, 0)
             self._shadow_command = (self._shadow_command[:cx] +
                 self._shadow_command[_e + 1:])
-            if clear_word:
-                return self._super_return(1, 0)
             ch = bindings.CTRL_D
         elif ch in bindings.yank:
             self._shadow_command = (self._shadow_command[:cx] +
@@ -211,6 +227,34 @@ class Command(textpad.Textbox):
         self._adjust_index_tab()
 
         return self._super_return(ret_val, 0)
+
+    def edit(self, validate=None):
+        "Edit in the widget window and collect the results."
+        while 1:
+            ch = self.win.getch()
+            if validate:
+                ch = validate(ch)
+            if not ch:
+                continue
+            if not self.do_command(ch):
+                break
+
+            cy, cx = self._input_field.getyx()
+            if cx - self._myoff > self._curr_offset:
+                self._curr_offset = cx - self._myoff
+            elif cx < self._curr_offset:
+                self._curr_offset = cx
+            if self._center:
+                self._center = False
+                tab_offset = self._tab_offset
+                if cx - self._curr_offset < self._myoff:
+                    tab_offset = (cx - self._curr_offset -
+                        (self._myoff - tab_offset))
+                self._curr_offset += tab_offset
+            self.win.refresh(0, self._curr_offset, self._line_number,
+                self._y_offset, self._line_number, self._xmax)
+
+        return self.gather()
 
     def _adjust_index_tab(self):
         """
@@ -334,7 +378,7 @@ class Command(textpad.Textbox):
                 end_idx = n_hi
 
             stdscr.addstr(
-                self._line_number + 19,
+                self._line_number + 12,
                 0,
                 'override: ' + str(cx) + ' ' + prev_arg
             )
@@ -343,9 +387,6 @@ class Command(textpad.Textbox):
             # Figure if word is in tab_args
             # Figure out changes of that word.
             # Create new tabbable argument.
-
-        #stdscr.addstr(19 + self._line_number, 0, str(self._tab_args))
-        #stdscr.refresh()
 
     def _edit(self, cx, ch):
         """Puts removed characters before/after cursor in yank."""
@@ -399,7 +440,6 @@ class Command(textpad.Textbox):
         - `command`: printf like formatted string.
         - `args`: tuple of arguments that should be put into formatted string.
         """
-        #holders = re.findall("%s|%c", command)
         holders = re.split("(%s|%c)", command)
 
         tmp_len = 0
@@ -428,9 +468,6 @@ class Command(textpad.Textbox):
         self._shadow_command = ''.join(holders)
         # Create index_tab
         self._adjust_index_tab()
-
-        #stdscr.addstr(19 + self._line_number, 0, str(self._tab_value))
-        #stdscr.refresh()
 
         return ''.join(holders)
 
@@ -477,8 +514,9 @@ class Command(textpad.Textbox):
 
     def _print_command(self, command):
         """Print command in the commands list in main terminal window."""
-        self._input_field.addstr(command)
-        self._input_field.refresh()
+        self._input_field.addstr(0, 0, command)
+        self._input_field.refresh(0, 0, self._line_number,
+            self._y_offset, self._line_number, self._xmax)
 
     def print_description(self):
         """Print command description in main terminal window."""
