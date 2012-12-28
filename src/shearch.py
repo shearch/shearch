@@ -3,6 +3,7 @@
 # Author: Ziga Zupanec <ziga.zupanec@gmail.com>
 
 import curses
+import os
 import sys
 
 import bindings
@@ -90,7 +91,9 @@ def print_command(idx):
     if index >= len(commands):
         return
 
-    sys.stdout.write(commands[index].get_command())
+    out = os.fdopen(3, 'w')
+    out.write(commands[index].get_command())
+    out.flush()
 
 stdscr = curses.initscr()
 stdscr.box()
