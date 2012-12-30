@@ -13,7 +13,7 @@ shearch
 
 About
 -----
-shearch wants to be easier to use shell's history. It is highly cusomizable
+shearch wants to be easier to use shell's history. It is highly customizable
 meaning you can `add your own commands`_, quickly navigate through them and
 recall them simply by entering a few key tags. It offers you in-place editing
 of command's arguments by pressing ``TAB`` key to cycle through them. When

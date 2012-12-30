@@ -2,7 +2,7 @@
     "item": [
         {
             "command"     : "find . -name \"*.txt\"",
-            "description" : "Finds all files cotaining string %str%",
+            "description" : "Finds all files txt files.",
             "nix_edit"    : {
                                 "mask": "find . -name \"%s\"",
                                 "args": ["*.txt"]

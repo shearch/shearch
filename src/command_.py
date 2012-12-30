@@ -306,7 +306,7 @@ class Command(textpad.Textbox):
         """
         Recalculate new <TAB> indexes for edible arguments.
 
-        Updates followin structures:
+        Updates following structures:
 
         - `_tab_args`
         - `_tab_value`
@@ -395,14 +395,14 @@ class Command(textpad.Textbox):
                 p_hi = p_lo + len(self._tab_value[p_lo])
 
             if (idx + 1) == len(self._index_tab):
-                # This case covers cyclicism.
+                # This case covers cyclic-ism.
                 n_lo = self._index_tab[0]
                 n_hi = n_lo + len(self._tab_value[n_lo])
             elif (idx + 1) < len(self._index_tab):
                 n_lo = self._index_tab[idx + 1]
                 n_hi = n_lo + len(self._tab_value[n_lo])
 
-            # Find if changed occured on tabbable word.
+            # Find if changed occurred on tabbable word.
             if p_lo <= cx <= p_hi:
                 is_changed = True
                 prev_arg = self._tab_value[p_lo]
@@ -424,7 +424,7 @@ class Command(textpad.Textbox):
             # Create new tabbable argument.
 
     def _edit(self, cx, ch):
-        """Puts removed characters before/after cursor in yank."""
+        """Puts removed characters before / after cursor in yank."""
         _s = -1
         self._yank = ''
 

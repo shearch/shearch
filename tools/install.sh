@@ -110,7 +110,7 @@ map_key()
 			echo "Selected key is out of range."
 		fi
 	else
-		echo "Installer can map only 'F' keys and Shitf + 'F' keys at the moment."
+		echo "Installer can map only 'F' keys and Shift + 'F' keys at the moment."
 	fi
 
 	return 1
@@ -158,7 +158,7 @@ hk_bash()
 	if [ -n "$HK_FOUND" ]; then
 		[[ $HK_FOUND =~ $SH_REGEX ]]
 		name="${BASH_REMATCH[1]}"
-		echo -ne "\033[0;31mYou already have hotkey of shearch bound to... \033[0m"
+		echo -ne "\033[0;31mYou already have key of shearch bound to... \033[0m"
 		SH_HOTKEY="${name}"
 		parse_key
 		if [ $? -eq 1 ]; then
@@ -195,7 +195,7 @@ hk_zsh()
 	if [ -n "$HK_FOUND" ]; then
 		[[ $HK_FOUND =~ $SH_REGEX ]]
 		name="${match[1]}"
-		echo -ne "\033[0;31mYou already have hotkey of shearch bound to... \033[0m"
+		echo -ne "\033[0;31mYou already have key of shearch bound to... \033[0m"
 		SH_HOTKEY="${name}"
 		parse_key
 		if [ $? -eq 1 ]; then
