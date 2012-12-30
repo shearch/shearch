@@ -12,15 +12,15 @@ How To Use This Module
 ======================
 (See the individual classes, methods, and attributes for details.)
 
-1. Import it: ``import command_``.
+1. Import it: ``>>> import command_``.
 
-2. Initialize command: ``mycommand = command_.Command(...)``.
+2. Initialize command: ``>>> mycommand = command_.Command(...)``.
 
 3. Interact with command::
 
     a) Print command description: ``mycommand.print_description()``.
 
-    b) Manipulate cursor position: ``mycommand.get_input_field().move(0, 0)``.
+    b) Move cursor: ``mycommand.get_input_field().move(0, 0)``.
 
     c) Edit command in-place: ``mycommand.edit()``.
 """
@@ -45,20 +45,20 @@ class Command(textpad.Textbox):
     manipulation. Implemented standard - EMACS(?) shortcuts for word
     traversal and editing.
 
-    ALT_B : Back, left one word.
-    ALT_F : Forward, right one word.
-    CTRL_A: Beginning of the line (Home).
-    CTRL_B: Back one character.
-    CTRL_D: Delete.
-    CTRL_E: End of the line (End).
-    CTRL_F: Forward one character.
-    CTRL_H: Backspace.
-    CTRL_K: Cut line after cursor to clipboard.
-    CTRL_U: Cut line before cursor to clipboard.
-    CTRL_W: Cut word before cursor to clipboard.
-    CTRL_Y: Yank (paste). DSUSP, delayed suspend on BSD-based systems.
-    TAB   : Cycle through command arguments.
-    STAB  : Reverse cycle through command arguments.
+    - ALT_B: Back, left one word.
+    - ALT_F: Forward, right one word.
+    - CTRL_A: Beginning of the line (Home).
+    - CTRL_B: Back one character.
+    - CTRL_D: Delete.
+    - CTRL_E: End of the line (End).
+    - CTRL_F: Forward one character.
+    - CTRL_H: Backspace.
+    - CTRL_K: Cut line after cursor to clipboard.
+    - CTRL_U: Cut line before cursor to clipboard.
+    - CTRL_W: Cut word before cursor to clipboard.
+    - CTRL_Y: Yank (paste). DSUSP, delayed suspend on BSD-based systems.
+    - TAB: Cycle through command arguments.
+    - SHIFT_TAB: Reverse cycle through command arguments.
     """
 
     # TODO: Remove this debug hack.
@@ -141,27 +141,27 @@ class Command(textpad.Textbox):
             # Termination keys. Leave input_field. Mark prev cursor position?
             return 0
 
-        if self._prev_ch == bindings.ESC:
-            if ch == bindings.ESC:
+        if self._prev_ch is bindings.ESC:
+            if ch is bindings.ESC:
                 # Leaving input on double ESC.
                 return 0
             elif ch in (bindings.ALT_KEYS):
-                if ch == bindings.KEY_B:
+                if ch is bindings.KEY_B:
                     _s = self._prev_word(cx)
                     self._input_field.move(0, _s)
-                elif ch == bindings.KEY_F:
+                elif ch is bindings.KEY_F:
                     _s = self._next_word(cx)
                     self._input_field.move(0, _s)
                 self._adjust_index_tab()
                 return self._super_return(1, 0)
             #else: Treat the rest as _prev_ch was not ESC key. Ignore or cont?
 
-        if ch == bindings.ESC:
+        if ch is bindings.ESC:
             return self._super_return(1, ch)
 
         if ch in bindings.tabs:
             # Move cursor to the next nearest tab field.
-            if ch == bindings.TAB:
+            if ch is bindings.TAB:
                 selected_word_index, next_field = self._find_next_field(
                     cx,
                     self._index_tab
@@ -203,32 +203,33 @@ class Command(textpad.Textbox):
             _e = cx + arg_len
             self._delete_chars(arg_len)
 
-        if ch == bindings.BACKSLASH:
+        if ch is bindings.BACKSLASH:
             character = '\\\\'
             _e += 1
         elif ch in bindings.backspace:
             insert_char = False
             if clear_word:
                 self._shadow_command = (self._shadow_command[:cx - 1] +
-                    self._shadow_command[_e - 1:])
+                                        self._shadow_command[_e - 1:])
                 self._adjust_index_tab()
                 return self._super_return(1, 0)
             self._shadow_command = (self._shadow_command[:cx - 1] +
-                self._shadow_command[_e:])
+                                    self._shadow_command[_e:])
             ch = bindings.CTRL_H
         elif ch in bindings.delete:
             insert_char = False
             if clear_word:
                 self._shadow_command = (self._shadow_command[:cx - 1] +
-                    self._shadow_command[_e - 1:])
+                                        self._shadow_command[_e - 1:])
                 self._adjust_index_tab()
                 return self._super_return(1, 0)
             self._shadow_command = (self._shadow_command[:cx] +
-                self._shadow_command[_e + 1:])
+                                    self._shadow_command[_e + 1:])
             ch = bindings.CTRL_D
         elif ch in bindings.yank:
             self._shadow_command = (self._shadow_command[:cx] +
-                str(self._yank) + self._shadow_command[_e:])
+                                    str(self._yank) +
+                                    self._shadow_command[_e:])
             self._put_chars(str(self._yank))
             self._adjust_index_tab()
             return self._super_return(1, 0)
@@ -291,7 +292,7 @@ class Command(textpad.Textbox):
         return self._shadow_command
 
     def get_input_field(self):
-        """Public method return input field. Used to control cursor."""
+        """Return input field. Used to control cursor."""
         return self._input_field
 
     def print_description(self):
@@ -317,7 +318,7 @@ class Command(textpad.Textbox):
         for key, value in self._tab_args.iteritems():
             kw = r'\b' + re.escape(key)
             self._tab_args[key] = [m.start() for m in re.finditer(
-                kw, self._shadow_command)]
+                                   kw, self._shadow_command)]
 
             for pos in self._tab_args[key]:
                 self._tab_value[pos] = key
@@ -427,14 +428,14 @@ class Command(textpad.Textbox):
         _s = -1
         self._yank = ''
 
-        if ch == bindings.CTRL_K:
+        if ch is bindings.CTRL_K:
             self._yank = self._shadow_command[cx:]
             self._shadow_command = self._shadow_command[:cx]
-        elif ch == bindings.CTRL_U:
+        elif ch is bindings.CTRL_U:
             _s = 0
             self._yank = self._shadow_command[:cx]
             self._shadow_command = self._shadow_command[cx:]
-        elif ch == bindings.CTRL_W:
+        elif ch is bindings.CTRL_W:
             _s = self._prev_word(cx)
             self._yank = self._shadow_command[_s:cx]
             self._shadow_command = (self._shadow_command[:_s] +
