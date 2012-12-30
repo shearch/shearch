@@ -32,7 +32,7 @@ ui_zsh()
 	fi
 	UI_P[1]="shpush()"
 	UI_P[2]="{"
-	UI_P[3]="  TMP_OUT=\$(~/.shearch/shearch.py 3>&1 1>&2)"
+	UI_P[3]="  TMP_OUT=\$(~/.shearch/src/shearch.py 3>&1 1>&2)"
 	UI_P[4]="  print -z \$TMP_OUT"
 	UI_P[5]="}"
 
@@ -78,7 +78,7 @@ if [ "$ZSH_VERSION" ]; then
 	ui_zsh
 elif [ "$BASH_VERSION" ]; then
 	SH_CONFIG=~/.bashrc
-	SH_HOTLINE="^bind '\".*\": \"\`python ~/.shearch/shearch.py 3>&1 1>&2\`\\\e\\\C-e\"'$"
+	SH_HOTLINE="^bind '\".*\": \"\`python ~/.shearch/src/shearch.py 3>&1 1>&2\`\\\e\\\C-e\"'$"
 	ui_bash
 else
 	echo "You will have to remove bindings yourself :(."
