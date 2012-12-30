@@ -91,6 +91,8 @@ def print_command(idx):
     if index >= len(commands):
         return
 
+    # Python os.fdopen() Method [1]
+    # [1]: http://www.tutorialspoint.com/python/os_fdopen.htm
     out = os.fdopen(3, 'w')
     out.write(commands[index].get_command())
     out.flush()
@@ -162,7 +164,7 @@ while key not in bindings.enter:
         stdscr.addstr(y_offset, max_i, ' ')
         parse_tags(tag_field)
         tag_field += ' '
-    elif key == bindings.TAB:
+    elif key is bindings.TAB:
         edit_command(asterisk)
     elif key <= 0xff:
         max_i += 1
