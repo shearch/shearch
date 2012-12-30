@@ -7,7 +7,7 @@ else
 	return 1
 fi
 
-if git remote add upstream_tmp git://github.com/shearch/shearch.git; then
+if git remote add upstream git@github.com:shearch/shearch.git; then
 	echo -e "\033[0;32mChecking for the latest version.\033[0m"
 else
 	echo -e "\033[0;32mOops! Something went wrong. We'll try again later.\033[0m"
