@@ -151,13 +151,7 @@ Add your own commands
 ---------------------
 - Create a file in `~/.shearch/src/db/` ending with `.json` suffix.
 
-.. code-block:: http
-
-    PUT /person/1 HTTP/1.1
-    Accept: application/json
-    Content-Type: application/json; charset=utf-8
-    Host: api.example.com
-    User-Agent: HTTPie/0.2.7dev
+.. code-block:: json
 
     {
         "command"     : "find . -name \"*.txt\"",
