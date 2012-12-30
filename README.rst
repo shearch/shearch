@@ -93,19 +93,18 @@ section. When you are ready to share follow this steps:
 
 Installation
 ------------
-from curl::
-
+- from curl
 .. code-block:: bash
 
     $ curl -L https://github.com/shearch/shearch/raw/master/tools/install.sh | .
 
-from wget::
+- from wget
 
 .. code-block:: bash
 
     $ wget --no-check-certificate https://github.com/shearch/shearch/raw/master/tools/install.sh -O - | .
 
-manually (rather use one of the above)::
+- manually (rather use one of the above)
 
 .. code-block:: bash
 
