@@ -180,7 +180,7 @@ hk_bash()
 	fi
 
 	if [ $response -eq 0 ]; then
-		shortcut="bind '\"${SH_HOTKEY}\": \"\`python ~/.shearch/shearch.py 3>&1 1>&2\`\\e\\C-e\"'"
+		shortcut="bind '\"${SH_HOTKEY}\": \"\`python ~/.shearch/src/shearch.py 3>&1 1>&2\`\\e\\C-e\"'"
 		printf "\n%s\n" "$shortcut" >> "$SH_CONFIG"
 		return 0
 	fi
@@ -218,7 +218,7 @@ hk_zsh()
 	fi
 
 	if [ $response -eq 0 ]; then
-		echo "shpush()\n{\n  TMP_OUT=\$(~/.shearch/shearch.py 3>&1 1>&2)\n  print -z \$TMP_OUT\n}" >> "$SH_CONFIG"
+		echo "shpush()\n{\n  TMP_OUT=\$(~/.shearch/src/shearch.py 3>&1 1>&2)\n  print -z \$TMP_OUT\n}" >> "$SH_CONFIG"
 
 		shortcut="bindkey -s \"${SH_HOTKEY}\" \" shpush\\n\""
 		printf "\n%s\n" "$shortcut" >> "$SH_CONFIG"
@@ -247,8 +247,8 @@ elif [ "$BASH_VERSION" ]; then
 	SH_NAME="bash"
 	SH_VERSION="$BASH_VERSION"
 	SH_CONFIG=~/.bashrc
-	SH_HOTLINE="^bind '\".*\": \"\`python ~/.shearch/shearch.py 3>&1 1>&2\`\\\e\\\C-e\"'$"
-	SH_REGEX="^bind '\"(.*)\": \"\`python ~/.shearch/shearch.py 3>&1 1>&2\`\\\e\\\C-e\"'$"
+	SH_HOTLINE="^bind '\".*\": \"\`python ~/.shearch/src/shearch.py 3>&1 1>&2\`\\\e\\\C-e\"'$"
+	SH_REGEX="^bind '\"(.*)\": \"\`python ~/.shearch/src/shearch.py 3>&1 1>&2\`\\\e\\\C-e\"'$"
 	hk_bash
 	response=$?
 else
