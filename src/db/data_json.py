@@ -18,7 +18,6 @@ uberset = set()
 
 for json_file_name in os.listdir(os.path.dirname(__file__)):
     if json_file_name.endswith('.json'):
-        print json_file_name
         json_file = os.path.join(os.path.dirname(__file__), json_file_name)
         json_data = open(json_file)
         data = json.load(json_data)
