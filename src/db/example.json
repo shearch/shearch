@@ -1,87 +1,60 @@
 {
-	"item": [
-		{
-			"command"     : "find . -name \"*.txt\"",
-			"description" : "Finds all files cotaining string %str%",
-			"nix_edit"    : {
-								"mask": "find . -name \"%s\"",
-								"args": ["*.txt"]
-							},
-			"tag"         : ["find", "files", "contain"]
-		},
-		{
-			"command"     : "ps aux",
-			"description" : "List all processes.",
-			"tag"         : ["list", "process", "ps"]
-		},
-		{
-			"command"     : "hg status",
-			"description" : "Returns hg status.",
-			"tag"         : ["hg", "mercurial", "status"]
-		},
-		{
-			"command"     : "git status",
-			"description" : "Returns git status.",
-			"tag"         : ["git", "status"]
-		},
-		{
-			"command"     : "svn status",
-			"description" : "Returns subversion status.",
-			"tag"         : ["subversion", "svn", "status"]
-		},
-		{
-			"command"     : "git commit -m \"Added new commands.\"",
-			"description" : "Saves your newly added commands.",
-			"nix_edit"    : {
-								"mask": "git commit -m \"%s\"",
-								"args": ["Added new commands"]
-							},
-			"tag"         : ["git", "contribute", "commit"]
-		},
-		{
-			"command"     : "git remote add mygithub git@github.com:agiz/shearch.git",
-			"description" : "Adds your github to remote repositories.",
-			"nix_edit"    : {
-								"mask": "git remote add %s git@github.com:%c/%s.git",
-								"args": ["mygithub", "git config --global user.name", "shearch"]
-							},
-			"tag"         : ["git", "add", "commit", "remote", "contribute"]
-		},
-		{
-			"command"     : "git push mygithub master",
-			"description" : "Uploads changes to your github repository.",
-			"nix_edit"    : {
-								"mask": "git push %s %s",
-								"args": ["mygithub", "master"]
-							},
-			"tag"         : ["git", "push", "contribute"]
-		},
-		{
-			"command"     : "curl -D - --cookie \"sessionid=5cd7c56625d6139af7539f56d59e141e\" -H \"Content-type: application/json\" -X POST -d'{\"message\": \"Test post.\"}' http://127.0.0.1:8000/api/v1/post/",
-			"description" : "POST over Restful api (change cookie with one in your browser).",
-			"nix_edit"    : {
-								"mask": "curl -D - --cookie \"%s\" -H \"Content-type: application/json\" -X POST -d'{\"message\": \"%s\"}' %s://%s",
-								"args": ["sessionid=5cd7c56625d6139af7539f56d59e141e", "Test post.", "http", "127.0.0.1:8000/api/v1/post/"]
-							},
-			"tag"         : ["curl", "json", "rest", "piplmesh"]
-		},
-		{
-			"command"     : "curl -D - --cookie \"sessionid=5cd7c56625d6139af7539f56d59e141e\" -H \"Content-type: application/json\" -X POST -d'{\"message\": \"komentar.\"}' http://127.0.0.1:8000/api/v1/post/4fbcb1dd5c46fa265c00000d/comments/",
-			"description" : "Add comment over Restful api.",
-			"nix_edit"    : {
-								"mask": "curl -D - --cookie \"%s\" -H \"Content-type: application/json\" -X POST -d'{\"message\": \"%s\"}' %s://%s",
-								"args": ["sessionid=5cd7c56625d6139af7539f56d59e141e", "komentar.", "http", "127.0.0.1:8000/api/v1/post/4fbcb1dd5c46fa265c00000d/comments/"]
-							},
-			"tag"         : ["curl", "json", "rest", "piplmesh"]
-		},
-		{
-			"command"     : "curl -D - --cookie \"sessionid=5cd7c56625d6139af7539f56d59e141e\" -H \"Content-type: application/json; type=link\" -X POST -d'{\"link_url\": \"http://yt.com\",\"link_caption\":\"Funny vid.\"}' http://127.0.0.1:8000/api/v1/post/4fbcb1dd5c46fa265c00000d/attachments/",
-			"description" : "Add attachment over Restful api.",
-			"nix_edit"    : {
-								"mask": "curl -D - --cookie \"%s\" -H \"Content-type: application/json; type=link\" -X POST -d'{\"link_url\": \"%s\",\"link_caption\": \"%s\"}' %s://%s",
-								"args": ["sessionid=5cd7c56625d6139af7539f56d59e141e", "http://yt.com", "Funny vid.", "http", "127.0.0.1:8000/api/v1/post/4fbcb1dd5c46fa265c00000d/attachments/"]
-							},
-			"tag"         : ["curl", "json", "rest", "piplmesh"]
-		}
-	]
+    "item": [
+        {
+            "command"     : "find . -name \"*.txt\"",
+            "description" : "Finds all files txt files.",
+            "nix_edit"    : {
+                                "mask": "find . -name \"%s\"",
+                                "args": ["*.txt"]
+                            },
+            "tag"         : ["find", "files", "contain"]
+        },
+        {
+            "command"     : "ps aux",
+            "description" : "List all processes.",
+            "tag"         : ["list", "process", "ps"]
+        },
+        {
+            "command"     : "hg status",
+            "description" : "Returns hg status.",
+            "tag"         : ["hg", "mercurial", "status"]
+        },
+        {
+            "command"     : "git status",
+            "description" : "Returns git status.",
+            "tag"         : ["git", "status"]
+        },
+        {
+            "command"     : "svn status",
+            "description" : "Returns subversion status.",
+            "tag"         : ["subversion", "svn", "status"]
+        },
+        {
+            "command"     : "git commit -m \"Added new commands.\"",
+            "description" : "Saves your newly added commands.",
+            "nix_edit"    : {
+                                "mask": "git commit -m \"%s\"",
+                                "args": ["Added new commands"]
+                            },
+            "tag"         : ["git", "contribute", "commit"]
+        },
+        {
+            "command"     : "git remote add mygithub git@github.com:agiz/shearch.git",
+            "description" : "Adds your github to remote repositories.",
+            "nix_edit"    : {
+                                "mask": "git remote add %s git@github.com:%c/%s.git",
+                                "args": ["mygithub", "git config --global user.name", "shearch"]
+                            },
+            "tag"         : ["git", "add", "commit", "remote", "contribute"]
+        },
+        {
+            "command"     : "git push mygithub master",
+            "description" : "Uploads changes to your github repository.",
+            "nix_edit"    : {
+                                "mask": "git push %s %s",
+                                "args": ["mygithub", "master"]
+                            },
+            "tag"         : ["git", "push", "contribute"]
+        }
+    ]
 }

@@ -22,13 +22,13 @@ CTRL__    = 0x1f  # Undo.
 DELETE    = 0x14a
 ENTER     = 0x157
 ESC       = 0x1b
-KEY_B     = 0x62
+KEY_B     = 0x62  # With ALT: Back, left one word.
 KEY_C     = 0x63
 KEY_D     = 0x64
 KEY_DOWN  = 0x102
 KEY_HOME  = 0x106
 KEY_END   = 0x168
-KEY_F     = 0x66
+KEY_F     = 0x66  # With ALT: Forward, right one word.
 KEY_L     = 0x6c
 KEY_LEFT  = 0x104
 KEY_R     = 0x72
@@ -49,8 +49,8 @@ ALT_KEYS = (BACKSPACE, KEY_B, KEY_C, KEY_D, KEY_F, KEY_L, KEY_R, KEY_T, KEY_U)
 
 editing = (CTRL_K, CTRL_U, CTRL_W)
 
-moving = (CTRL_A, CTRL_B, CTRL_E, CTRL_F, KEY_HOME,
-    KEY_END, KEY_LEFT, KEY_RIGHT)
+moving = (CTRL_A, CTRL_B, CTRL_E, CTRL_F,
+          KEY_HOME,KEY_END, KEY_LEFT, KEY_RIGHT)
 
 next = (KEY_DOWN, CTRL_N)
 prev = (KEY_UP, CTRL_P)

@@ -23,6 +23,7 @@ Contents
 .. toctree::
    :maxdepth: 2
 
+   README
    code
 
 
@@ -33,7 +34,7 @@ For development GitHub_ is used, so source code and issue tracker is found
 there_.
 
 .. _GitHub: https://github.com/
-.. _there: https://github.com/agiz/shearch
+.. _there: https://github.com/shearch/shearch
 
 Indices and tables
 ==================

@@ -7,32 +7,34 @@ This demonstrates simple command base creation using data from example.json.
 import json
 import os
 
-json_file = os.path.join(os.path.dirname(__file__), 'example.json')
-json_data = open(json_file)
-data = json.load(json_data)
-
-# Key is tag, value is hash command.
 db = {}
+"""Key is tag, value is hash command."""
 
-# Key is hash command, value is item
 command = {}
+"""Key is hash command, value is item."""
 
-# Array of all keys (to be used with sets).
 uberset = set()
+"""# Array of all keys (to be used with sets)."""
 
-for item in data['item']:
-    key = hash(item['command'])
-    command[key] = item
-    uberset.add(key)
+for json_file_name in os.listdir(os.path.dirname(__file__)):
+    if json_file_name.endswith('.json'):
+        json_file = os.path.join(os.path.dirname(__file__), json_file_name)
+        json_data = open(json_file)
+        data = json.load(json_data)
 
-    tags = item['tag']
-    for tag in tags:
-        if tag not in db:
-            db[tag] = []
-        db[tag].append(key)
+        for item in data['item']:
+            key = hash(item['command'])
+            command[key] = item
+            uberset.add(key)
+
+            tags = item['tag']
+            for tag in tags:
+                if tag not in db:
+                    db[tag] = []
+                db[tag].append(key)
 
 def get_commands(tags):
-    # tags have to be an array! Checking is omitted so be careful.
+    # tags have to be in an array! Checking is omitted so be careful.
     result = []
     common = uberset
 
