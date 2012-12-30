@@ -154,13 +154,13 @@ Add your own commands
 .. code-block:: http
 
     {
-        "command"     : "find . -name \"*.txt\"",
-        "description" : "Finds all txt files in current directory.",
-        "nix_edit"    : {
-                            "mask": "find %s -name \"%s\"",
-                            "args": [".", "*.txt"]
-                        },
-        "tag"         : ["find", "search", "locate", "text", "files"]
+        "age": 29,
+        "hobbies": [
+            "http",
+            "pies"
+        ],
+        "married": false,
+        "name": "John"
     }
 
 JSON database structure. Single item contains::
