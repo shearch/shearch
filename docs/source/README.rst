@@ -94,6 +94,7 @@ section. When you are ready to share follow this steps:
 Installation
 ------------
 - from curl
+
 .. code-block:: bash
 
     $ curl -L https://github.com/shearch/shearch/raw/master/tools/install.sh | .
