@@ -150,6 +150,7 @@ Cycle through arguments.
 Add your own commands
 ---------------------
 - Create a file in `~/.shearch/src/db/` ending with `.json` suffix.
+
 .. code-block:: http
 
     {
