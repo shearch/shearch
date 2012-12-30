@@ -153,14 +153,20 @@ Add your own commands
 
 .. code-block:: http
 
+    PUT /person/1 HTTP/1.1
+    Accept: application/json
+    Content-Type: application/json; charset=utf-8
+    Host: api.example.com
+    User-Agent: HTTPie/0.2.7dev
+
     {
-        "age": 29,
-        "hobbies": [
-            "http",
-            "pies"
-        ],
-        "married": false,
-        "name": "John"
+        "command"     : "find . -name \"*.txt\"",
+        "description" : "Finds all txt files in current directory.",
+        "nix_edit"    : {
+                            "mask": "find %s -name \"%s\"",
+                            "args": [".", "*.txt"]
+                        },
+        "tag"         : ["find", "search", "locate", "text", "files"]
     }
 
 JSON database structure. Single item contains::
