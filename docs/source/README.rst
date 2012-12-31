@@ -97,13 +97,13 @@ Installation
 
 .. code-block:: bash
 
-    $ curl -L https://github.com/shearch/shearch/raw/master/tools/install.sh | .
+    $ curl -o install.sh -L https://github.com/shearch/shearch/raw/master/tools/install.sh && . ./install.sh
 
 - from wget
 
 .. code-block:: bash
 
-    $ wget --no-check-certificate https://github.com/shearch/shearch/raw/master/tools/install.sh -O - | .
+    $ wget --no-check-certificate https://github.com/shearch/shearch/raw/master/tools/install.sh && . ./install.sh
 
 - manually (rather use one of the above)
 
